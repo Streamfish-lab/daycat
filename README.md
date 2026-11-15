@@ -124,6 +124,28 @@ scripts/
 - 桌面小组件是三个固定尺寸的独立组件，**不支持拉伸和滑动翻周**（点一下打开 App）
 - 没有做工信部 App 备案，安装时会有系统提示
 
+## 检查更新
+
+App 启动 5 秒后自动查一次（24 小时内不重复），设置页也有「检查更新」可以手动点。
+发现新版本会弹窗显示版本号、更新说明和「去下载」按钮，点了用系统浏览器打开下载页。
+
+判断依据是 `version.json` 里的 `code` 和当前 `versionCode` 比较（不是比字符串）：
+
+```json
+{ "version": "2.0.1", "code": 115,
+  "url": "https://github.com/<你>/<仓库>/releases/latest/download/Schedule.apk",
+  "notes": "更新说明，换行用 \n" }
+```
+
+**两处地址要一起改**（改了仓库名或迁移了文件位置时）：
+
+1. `app-src/src/com/liu/dailycat/MainActivity.java` 里的 `UPDATE_URL`
+   —— 默认走 jsDelivr 镜像：`https://cdn.jsdelivr.net/gh/<你>/<仓库>@main/version.json`
+2. 仓库根目录 `version.json` 的 `url` 字段 —— 建议用 `releases/latest/download/` 这种形式，永远指向最新版
+
+请求由原生 `HttpURLConnection` 发出（不是 WebView 里的 fetch），所以没有跨域问题，
+也不受前端 `NET_ON` 开关影响。只发一个 GET、不带任何用户数据。
+
 ## 开发日志
 
 从 Planly 改到现在的完整过程，包括每一版踩过的坑和修法：[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)

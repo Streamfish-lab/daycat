@@ -816,6 +816,28 @@ chips 后面加「+ 自定义」，点开一行 `提前 [_] 分钟 [+]`，1–14
 
 > 版本 2.0.05（versionCode 114）
 
+## 2.0.1 检查更新
+
+**方案定的很晚**：从 v1.9.44 开始就一直"留着位置以后做"，`NET_ON` 开关关掉了所有联网请求，包括原项目那个指向 `https://app.local/version.txt` 的假检查。
+
+**这一版真的做了**：
+
+1. **请求交给原生发**。WebView 里 `fetch` 跨域会被 CORS 拦（页面在 `app.local`，目标在 jsDelivr），所以用 `HttpURLConnection` 在 Java 侧请求，结果通过 `evaluateJavascript` 回调成 `window.__onUpdate(json)`。原生请求还有个附带好处：不受前端 `NET_ON` 开关影响，同步仍然是关的，只有版本检查这一条通道。
+
+2. **比 `code` 不比字符串**。`2.0.10` 和 `2.0.9` 按字符串比会得出错误结果，所以版本文件里带一个数字 `code`，和 `versionCode` 直接比较。
+
+3. **两档触发**：启动 5 秒后静默查一次（`localStorage` 记时间，24 小时内不重复），设置页「检查更新」可以手动查。静默模式只弹一次 toast（按版本号去重），手动模式打开完整弹窗。
+
+4. **下载走系统浏览器**。`openUrl()` 用 `ACTION_VIEW` 把链接交给浏览器，App 自己不下载、不需要 `REQUEST_INSTALL_PACKAGES` 权限。用户装的时候系统会校验签名 —— 签名不同就装不上，这是防假包的最后一道。
+
+5. **顺手修了个旧 bug**：`appVersion()` 一直返回硬编码的 `"1.9.35"`，改成读 `PackageManager` 的真实 versionName。
+
+**验证**：用 Playwright 直接调 `window.__onUpdate` 模拟原生回调 —— 有新版弹窗正常（版本号、当前版本、更新内容、按钮齐全）、旧版本不弹、设置页那行显示 `v2.0.1 ›`。
+
+**部署时要改的两处地址**（改仓库名时）：
+- `MainActivity.java` 的 `UPDATE_URL`（默认 `cdn.jsdelivr.net/gh/<user>/<repo>@main/version.json`）
+- 仓库根目录 `version.json` 里的 `url`
+
 ---
 
 # 附录 A · 构建链路

@@ -44,6 +44,11 @@ import java.util.Locale;
 
 public class MainActivity extends Activity {
 
+    /** 版本信息地址：改成你自己的仓库地址即可。
+     *  jsDelivr 是 GitHub 的 CDN 镜像，国内可访问；主地址不通时可换 raw.githubusercontent.com */
+    private static final String UPDATE_URL =
+            "https://cdn.jsdelivr.net/gh/Streamfish-lab/daycat@main/version.json";
+
     private static final String HOST = "https://app.local/";
     private WebView web;
     private ValueCallback<Uri[]> filePathCallback;
@@ -359,7 +364,70 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public String appVersion() {
-            return "1.9.35";
+            try {
+                return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        /** 检查更新：原生发请求，避开 WebView 的跨域限制。结果回调 window.__onUpdate(json|null) */
+        @JavascriptInterface
+        public void checkUpdate() {
+            new Thread(new Runnable() {
+                public void run() {
+                    String body = null;
+                    java.net.HttpURLConnection c = null;
+                    try {
+                        c = (java.net.HttpURLConnection) new java.net.URL(UPDATE_URL).openConnection();
+                        c.setConnectTimeout(8000);
+                        c.setReadTimeout(8000);
+                        c.setInstanceFollowRedirects(true);
+                        c.setRequestProperty("User-Agent", "Schedule-UpdateCheck");
+                        if (c.getResponseCode() == 200) {
+                            java.io.InputStream in = c.getInputStream();
+                            java.io.ByteArrayOutputStream bo = new java.io.ByteArrayOutputStream();
+                            byte[] buf = new byte[4096];
+                            int n;
+                            while ((n = in.read(buf)) > 0) bo.write(buf, 0, n);
+                            in.close();
+                            body = bo.toString("UTF-8");
+                        }
+                    } catch (Exception ignored) {
+                    } finally {
+                        try { if (c != null) c.disconnect(); } catch (Exception ignored) {}
+                    }
+                    final String res = body;
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            try {
+                                String arg = (res == null) ? "null" : JSONObject.quote(res);
+                                web.evaluateJavascript(
+                                        "window.__onUpdate&&window.__onUpdate(" + arg + ")", null);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    });
+                }
+            }).start();
+        }
+
+        /** 用系统浏览器打开链接（下载新版 APK） */
+        @JavascriptInterface
+        public void openUrl(final String url) {
+            if (url == null) return;
+            final String u = url.trim();
+            if (!u.startsWith("https://") && !u.startsWith("http://")) return;
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    try {
+                        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(u));
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(i);
+                    } catch (Exception ignored) {
+                    }
+                }
+            });
         }
 
         @JavascriptInterface

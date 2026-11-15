@@ -1,0 +1,24 @@
+# 签名文件绝对不能进仓库：泄露等于别人可以签出「看起来是你发的」更新包
+*.jks
+*.keystore
+*.p12
+
+# 构建产物
+*.apk
+*.aab
+build/
+out/
+*.zip
+
+# 本地配置
+local.properties
+.env
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 开发脚本产出的预览图
+preview_*.png

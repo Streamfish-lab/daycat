@@ -60,8 +60,8 @@ echo "== 6. 对齐"
 echo "== 7. 签名"
 "$BT/apksigner" sign --ks "$KS" --ks-pass "pass:$KS_PASS" \
   --key-pass "pass:$KS_PASS" --ks-key-alias "$KS_ALIAS" \
-  --out "$ROOT/daycat.apk" "$B/app.aligned.apk"
+  --out "$ROOT/Schedule.apk" "$B/app.aligned.apk"
 
 echo "== 8. 校验"
-"$BT/apksigner" verify --print-certs "$ROOT/daycat.apk" | head -4
-ls -lh "$ROOT/daycat.apk"
+"$BT/apksigner" verify --print-certs "$ROOT/Schedule.apk" | head -4
+ls -lh "$ROOT/Schedule.apk"

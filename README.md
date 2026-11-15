@@ -1,4 +1,4 @@
-# daycat
+# Schedule
 
 把 **任务、课表、精力** 放在同一条时间轴上的安卓日程应用。
 离线优先，不注册、不联网、没有广告，数据只存在你自己的手机上。
@@ -14,6 +14,11 @@
 </p>
 
 ---
+
+## 关于名字
+
+应用名是 **Schedule**，包名 `com.liu.dailycat` 是最早期起的（那时项目叫 dailycat），后来应用名改了但包名保留 ——
+包名一改，系统就当成另一个 App，所有已安装用户的数据都会丢，所以这个不能动。仓库名曾用 daycat，现统一为 schedule。
 
 ## 它解决什么问题
 
@@ -35,7 +40,7 @@
 
 ## 下载安装
 
-到 [Releases](../../releases) 下载最新的 `daycat.apk`，直接安装。
+到 [Releases](../../releases) 下载最新的 `Schedule.apk`，直接安装。
 
 > **安装时提示「未备案」是正常的。** 那是手机厂商对未登记工信部备案的应用做的提示，不是病毒报警。个人开发的应用没有走备案流程，所以会弹。点「继续安装」即可。
 
@@ -46,7 +51,7 @@ SHA-256: 45:A0:B3:CD:A3:03:E0:49:2C:E1:1B:4E:DC:B8:80:28:E9:9D:11:9A:12:02:5F:F7
 ```
 
 ```bash
-apksigner verify --print-certs daycat.apk
+apksigner verify --print-certs Schedule.apk
 ```
 
 ## 从源码构建
@@ -55,19 +60,19 @@ apksigner verify --print-certs daycat.apk
 
 ```bash
 export ANDROID_HOME=~/android-sdk
-export KS=~/.daycat/release.jks     # 你自己的签名密钥
+export KS=~/.daycat/release.jks     # 你自己的签名密钥（文件名随意）
 export KS_PASS=你的密码
-export KS_ALIAS=dailycat           # 可选，默认 dailycat
+export KS_ALIAS=dailycat           # 可选，默认 dailycat（历史别名，不影响使用）
 
 bash scripts/build_apk.sh
-# 产物：daycat.apk
+# 产物：Schedule.apk
 ```
 
 没有密钥就先造一个（**生成后务必备份，丢了就无法给已有用户推送更新**）：
 
 ```bash
 mkdir -p ~/.daycat
-keytool -genkeypair -v -keystore ~/.daycat/release.jks -alias dailycat \
+keytool -genkeypair -v -keystore ~/.daycat/release.jks -alias Schedule \
   -keyalg RSA -keysize 2048 -validity 10950 \
   -dname "CN=Your Name, O=Personal, C=CN"
 ```
@@ -118,6 +123,10 @@ scripts/
 - 提醒准时依赖系统的「精确闹钟」权限，部分 ROM 还需把电池策略设为「不受限制」
 - 桌面小组件是三个固定尺寸的独立组件，**不支持拉伸和滑动翻周**（点一下打开 App）
 - 没有做工信部 App 备案，安装时会有系统提示
+
+## 开发日志
+
+从 Planly 改到现在的完整过程，包括每一版踩过的坑和修法：[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
 
 ## License
 

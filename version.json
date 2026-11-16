@@ -1,6 +1,6 @@
 {
-  "version": "2.0.1",
-  "code": 115,
+  "version": "2.0.7",
+  "code": 121,
   "url": "https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk",
-  "notes": "· 新增「检查更新」：设置里手动查，启动时也会每 24 小时自动查一次\n· 发现新版本会提示，点「去下载」用浏览器打开\n· 修复设置页显示的版本号不同步的问题"
+  "notes": "· 修设置页版本号一直显示 2.0.1 的问题，改为从安装包读取\n· 修「检查更新」会误报有新版本的问题\n· 打包脚本自动同步版本号，不会再错开"
 }

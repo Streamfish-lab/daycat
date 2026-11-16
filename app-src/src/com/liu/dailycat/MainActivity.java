@@ -362,6 +362,17 @@ public class MainActivity extends Activity {
             }
         }
 
+        /** 版本号（整数），用于判断有没有新版本 */
+        @JavascriptInterface
+        public int appVersionCode() {
+            try {
+                return getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+            } catch (Exception e) {
+                return 0;
+            }
+        }
+
+        /** 版本名，如 2.0.7 */
         @JavascriptInterface
         public String appVersion() {
             try {

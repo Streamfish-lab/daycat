@@ -2401,13 +2401,20 @@ var UIM={
   remNone:"不提醒", remOnTime:"准时", rem5:"提前 5 分钟", rem10:"提前 10 分钟", rem30:"提前半小时", rem60:"提前 1 小时",
   repNone:"不重复", remAhead:"提前 {n} 分钟", remindRow:"提醒",
   importedN:"已导入 {n} 条课程", recognized:"识别到 {n} 条课程安排：",
-  ddlTitle:"截止提醒", ddlN:"{n} 项未完成",
+  ddlTitle:"截止提醒", ddlN:"{n} 项未完成", checkUpd:"检查更新",
   doneToday:"今天已完成", doneWeek:"本周已完成", doneMonth:"本月已完成",
   helpTitle:"常见疑问", helpNone:"没找到，换个词试试", helpPh:"搜一下：精力、课表、提醒、补记…",
   dueOverdue:"逾期 {n} 天", dueToday:"今天到期", dueTomorrow:"明天到期", dueIn:"还有 {n} 天",
   ciTitle:"从手机里选课表文件",
   ciHint:"把教务系统导出的课表（Excel，或先把 PDF 转成 Excel）存到手机里，点下面按钮选它。",
   ciPick:"选择 Excel 文件…", ciManual:"文件读不了？手动粘贴",
+  ciGridTag:" · 网格课表", ciPeriodT:"按课表更新节次时间", ciTermT:"设为开学第一周",
+  ciAiT:"文件格式没认出来？可以让 AI 帮你转一下",
+  ciAiT2:"有些课没读出来？也可以让 AI 整理一遍",
+  ciAiD:"不用自己改表格。① 复制下面这段话　② 连同课表一起发给 AI（豆包、元宝、DeepSeek 都行，文件或截图都可以）　③ 把它整理好的内容粘回下面这一栏。",
+  ciAiCopy:"复制这段话", ciAiDone:"已复制，去发给 AI 吧",
+  ciAiPaste:"AI 整理好后，把结果粘在这里",
+  ciAiPh:"高等数学|周一|第1-2节|5-17周|11J2102|韩雪",
   ciNoGrid:"表格组件没加载出来，用下面的「手动粘贴」吧。",
   searchTitle:"搜索", searchPh:"搜任务、笔记、课程…", searchHint:"输入关键词，边打边找", searchNone:"没找到",
   grpTask:"任务", grpNote:"笔记", grpCourse:"课程", searchMore:"还有 {n} 条，再打几个字",
@@ -2503,13 +2510,20 @@ var UIM={
   remNone:"Off", remOnTime:"On time", rem5:"5 min before", rem10:"10 min before", rem30:"30 min before", rem60:"1 hour before",
   repNone:"Never", remAhead:"{n} min before", remindRow:"Reminder",
   importedN:"{n} classes imported", recognized:"Found {n} class entries:",
-  ddlTitle:"Deadline alerts", ddlN:"{n} unfinished",
+  ddlTitle:"Deadline alerts", ddlN:"{n} unfinished", checkUpd:"Check for updates",
   doneToday:"Done today", doneWeek:"Done this week", doneMonth:"Done this month",
   helpTitle:"FAQ", helpNone:"Nothing found — try another word", helpPh:"Search: focus, classes, reminders…",
   dueOverdue:"{n} days overdue", dueToday:"Due today", dueTomorrow:"Due tomorrow", dueIn:"In {n} days",
   ciTitle:"Pick a schedule file from your phone",
   ciHint:"Save the schedule exported from your school system (Excel, or convert the PDF to Excel first) on your phone, then tap the button below.",
   ciPick:"Choose Excel file…", ciManual:"Can’t read the file? Paste it instead",
+  ciGridTag:" · grid timetable", ciPeriodT:"Update period times from this file", ciTermT:"Set as week 1 start",
+  ciAiT:"Format not recognised? Let an AI reshape it",
+  ciAiT2:"Some classes were not read — an AI can tidy the whole thing up",
+  ciAiD:"No need to edit the spreadsheet yourself. ① Copy the text below　② send it with your timetable to any AI chat (Doubao, Yuanbao, DeepSeek… — file or screenshot)　③ paste the result back into the box below.",
+  ciAiCopy:"Copy this text", ciAiDone:"Copied — send it to the AI",
+  ciAiPaste:"Paste the AI's result here",
+  ciAiPh:"Advanced Maths|周一|第1-2节|5-17周|11J2102|Han Xue",
   ciNoGrid:"The spreadsheet module did not load — use Paste below.",
   searchTitle:"Search", searchPh:"Search tasks, notes, classes…", searchHint:"Type to search as you go", searchNone:"Nothing found",
   grpTask:"Tasks", grpNote:"Notes", grpCourse:"Classes", searchMore:"{n} more — type a bit more",
@@ -2593,7 +2607,16 @@ var WD=(function(){
   return out;
 })();
 var KEEP_DAYS=14;
-var BUILD='2.0.05'; var VCODE=114;
+var BUILD='2.0.7'; var VCODE=121;
+/* 装进 APK 后以安装包里的真实版本为准 —— 免得改了 manifest 忘了改这两行 */
+(function(){
+  try{
+    var b=window.AndroidBridge;
+    if(!b) return;
+    if(b.appVersion){ var v=b.appVersion(); if(v) BUILD=v; }
+    if(b.appVersionCode){ var c=b.appVersionCode(); if(c>0) VCODE=c; }
+  }catch(e){}
+})();
 function isApp(){return !!window.AndroidBridge||!!(window.navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));}
 function nativeApp(){ return window.AndroidBridge||null; }
 var PRI=[{n:tr('Низкий'),c:'var(--gray)'},{n:tr('Средний'),c:'var(--accent)'},
@@ -3019,7 +3042,9 @@ function periodOf(n){
   return null;
 }
 function normalizeCourse(c){
-  return {id:c.id||uid(),name:c.name||'',teacher:c.teacher||'',place:c.place||'',
+  return {id:c.id||uid(),name:c.name||'',
+    teacher:String(c.teacher||'').replace(/[\s\u3000]+(讲师|副教授|教授|助教|研究员|副研究员|高级工程师|工程师|高级实验师|实验师|外聘[\u4e00-\u9fa5]*|助理[\u4e00-\u9fa5]*)$/,'').trim(),
+    place:c.place||'',
     wd:(typeof c.wd==='number')?c.wd:0,j1:c.j1||1,j2:c.j2||c.j1||1,
     weeks:Array.isArray(c.weeks)?c.weeks.slice():[],
     color:c.color||COURSE_COLORS[Math.abs((c.name||'').length*7+(c.j1||0))%COURSE_COLORS.length]};
@@ -6124,6 +6149,512 @@ function openEditor(task,pre){
   if(isNew) setTimeout(function(){tEl.focus();},260);
 }
 
+/* ---------- 通用课表解析：网格表 / 转置表 / 键值对表 ---------- */
+var WDX={'一':0,'二':1,'三':2,'四':3,'五':4,'六':5,'日':6,'天':6,'七':6};
+var TCPLACE=/楼|室|馆|厅|场|中心|车间|基地|校区|教室|机房|实验|幢|栋|苑|礼堂|大厦|广场|阶梯|教\d/;
+function cdNorm(v){
+  if(v==null) return '';
+  return String(v).replace(/\u00a0/g,' ').replace(/\r\n?/g,'\n').trim();
+}
+/* 星期：周一 / 星期一 / 周一\n10/5 / 一 / Monday */
+function wdLoose(s){
+  var t=cdNorm(s).replace(/\s+/g,'');
+  if(!t) return -1;
+  var m=t.match(/^(?:星期|周|礼拜)([一二三四五六日天1-7])/);
+  if(m) return WDX[m[1]];
+  if(/^[一二三四五六日天]$/.test(t)) return WDX[t];
+  if(/^mon(day)?$/i.test(t)) return 0;
+  if(/^tue(s|sday)?$/i.test(t)) return 1;
+  if(/^wed(nes|nesday)?$/i.test(t)) return 2;
+  if(/^thu(r|rs|rsday)?$/i.test(t)) return 3;
+  if(/^fri(day)?$/i.test(t)) return 4;
+  if(/^sat(urday)?$/i.test(t)) return 5;
+  if(/^sun(day)?$/i.test(t)) return 6;
+  return -1;
+}
+/* 节次：(1-2节) / 第3节 / 1-2 / 5 */
+function jcFrom(s){
+  var t=cdNorm(s).replace(/\s+/g,'');
+  if(!t) return null;
+  var m=t.match(/第?(\d{1,2})\s*[-—~至]\s*(\d{1,2})\s*节/);
+  if(m) return [+m[1],+m[2]];
+  m=t.match(/第(\d{1,2})节/);
+  if(m) return [+m[1],+m[1]];
+  m=t.match(/^(\d{1,2})[-—~至](\d{1,2})$/);
+  if(m) return [+m[1],+m[2]];
+  m=t.match(/^(\d{1,2})$/);
+  if(m) return [+m[1],+m[1]];
+  return null;
+}
+/* 时间：08:00-09:40 / 08:00 09:40 */
+function tmFrom(s){
+  var t=cdNorm(s).replace(/[：]/g,':');
+  var arr=t.match(/\d{1,2}:\d{2}/g);
+  if(!arr||!arr.length) return null;
+  function f(x){ var q=String(x).match(/^(\d{1,2}):(\d{2})$/); return q?(+q[1])*60+(+q[2]):null; }
+  if(arr.length>=2) return [f(arr[0]),f(arr[1])];
+  return [f(arr[0]),null];
+}
+/* 周次：7-18周 / 5-19周(单) / 1,3,5周 */
+function wkFrom(s){
+  var t=cdNorm(s).replace(/\s+/g,'');
+  var m=t.match(/(\d{1,2}(?:[-—~至]\d{1,2})?(?:[,，、]\d{1,2}(?:[-—~至]\d{1,2})?)*)周/);
+  if(!m) return null;
+  var body=m[1], par=null;
+  var tail=t.slice(m.index+m[0].length);
+  if(/^[（(]单[)）]/.test(tail)) par='odd';
+  else if(/^[（(]双[)）]/.test(tail)) par='even';
+  if(!par){ if(/单周/.test(t)) par='odd'; else if(/双周/.test(t)) par='even'; }
+  var out=[], parts=body.split(/[,，、]/);
+  parts.forEach(function(p){
+    p=p.replace(/\s/g,'');
+    var r=p.match(/^(\d{1,2})[-—~至](\d{1,2})$/);
+    if(r){ for(var i=+r[1];i<=+r[2];i++) out.push(i); return; }
+    if(/^\d{1,2}$/.test(p)) out.push(+p);
+  });
+  if(par==='odd') out=out.filter(function(x){return x%2===1;});
+  if(par==='even') out=out.filter(function(x){return x%2===0;});
+  out=out.filter(function(v,i,a){ return v>0&&v<40&&a.indexOf(v)===i; });
+  return out.sort(function(a,b){return a-b;});
+}
+function isNoCls(s){
+  var t=cdNorm(s).replace(/\s+/g,'');
+  if(!t) return true;
+  return /^[（(【\[]?(无课|无|空|空课|休息|午休|晚休|无课程|无安排|—|-|--|\/)[)）】\]]?$/.test(t);
+}
+function looksPlace(s){
+  var t=cdNorm(s).replace(/\s+/g,'');
+  if(!t||t.length>26) return false;
+  if(/[:：]/.test(t)) return false;
+  if(TCPLACE.test(t)) return true;
+  return /^[A-Za-z\u4e00-\u9fa5]{0,4}\d{2,4}[A-Za-z\u4e00-\u9fa5]{0,4}$/.test(t);
+}
+function looksPerson(s){
+  var t=cdNorm(s).replace(/\s+/g,'').replace(/\d+$/,'');
+  if(!t||t.length<2||t.length>6) return false;
+  if(/\d/.test(t)) return false;
+  if(TCPLACE.test(t)) return false;
+  if(/[:：\/]/.test(t)) return false;
+  if(/[·•]/.test(t)) return true;
+  return /^[\u4e00-\u9fa5]{2,4}$/.test(t);
+}
+function pickLbl(t,keys){
+  for(var i=0;i<keys.length;i++){
+    var m=t.match(new RegExp('(?:'+keys[i]+')\\s*[:：]\\s*([^\\n\\/、,，;；]+)'));
+    if(m&&m[1]&&m[1].trim()) return m[1].trim();
+  }
+  return '';
+}
+/* 清理课名：去换行、去课程号、去节次、去周次、去符号 */
+function cleanName(s){
+  var t=cdNorm(s).replace(/\s+/g,'');
+  t=t.replace(/[(（][0-9A-Za-z]{6,12}[)）]/g,'');
+  t=t.replace(/[(（][^)）]{0,8}节[)）]/g,'');
+  t=t.replace(/(?:\d{1,2}(?:[-—~至]\d{1,2})?周[（(]?[单双]?[)）]?[,，、]?)+/g,'');
+  t=t.replace(/[★☆◆■○◐●〇※△▲□]/g,'');
+  t=t.replace(/[(（]\s*[)）]/g,'');
+  t=t.replace(/^[\/\-—:：,，]+/,'').replace(/[\/\-—:：,，]+$/,'');
+  return t.trim();
+}
+/* 「字段:值」形式的一段，如 场地:11J2102 / 教师:韩雪 */
+function fieldOf(seg){
+  var t=cdNorm(seg);
+  var ci=t.search(/[:：]/);
+  if(ci>0) t=t.slice(0,ci).replace(/\s+/g,'')+t.slice(ci);
+  var m=t.match(/^(校区|场地|地点|教室|上课地点|上课教室|教师|老师|任课教师|主讲教师|主讲|职称|教学班组成|教学班|考核方式|学分|周学时|总学时)\s*[:：]\s*([\s\S]*)$/);
+  return m?{k:m[1],v:(m[2]||'').replace(/\s+/g,' ').trim()}:null;
+}
+/* 标签必须落在行首，避免把「场地:/教师:」里的半段当成独立标签 */
+function pickLblAt(t,keys){
+  for(var i=0;i<keys.length;i++){
+    var m=t.match(new RegExp('(?:^|[\\n])\\s*(?:'+keys[i]+')\\s*[:：]\\s*([^\\n\\/、,，;；]+)'));
+    if(m&&m[1]&&m[1].trim()) return m[1].trim();
+  }
+  return '';
+}
+function normT(s){ return cdNorm(s).replace(/\s+/g,'').replace(/\d+$/,''); }
+/* 一个格子 → 一门课 */
+function parseGridCell(raw,ctx){
+  var s=cdNorm(raw);
+  if(isNoCls(s)) return null;
+  var out={name:'',place:'',teacher:'',j1:ctx.j1,j2:ctx.j2,weeks:(ctx.weeks||[]).slice()};
+
+  /* 0. 花括号写法：高等数学 {第1-16周 张老师 A101 */
+  var bi=s.indexOf('{');
+  if(bi>0){
+    var nm0=cleanName(s.slice(0,bi));
+    if(nm0){
+      out.name=nm0;
+      var tail0=s.slice(bi);
+      var wb0=wkFrom(tail0); if(wb0&&wb0.length) out.weeks=wb0;
+      var jb0=jcFrom(tail0); if(jb0){ out.j1=jb0[0]; out.j2=jb0[1]; }
+      var rest0=tail0.replace(/[{}]/g,' ')
+        .replace(/第?\d{1,2}(?:[-—~至]\d{1,2})?周[（(]?[单双]?[)）]?/g,' ')
+        .split(/\s+/).filter(Boolean);
+      for(var q=0;q<rest0.length;q++){
+        if(!out.place&&looksPlace(rest0[q])){ out.place=rest0[q]; continue; }
+        if(!out.teacher&&looksPerson(rest0[q])){ out.teacher=rest0[q]; continue; }
+      }
+      return out;
+    }
+  }
+
+  /* A. 斜杠式（优先于键值对）：课名/(1-2节)7-18周/校区:主校区/场地:11J2102/教师:韩雪/... */
+  if(s.indexOf('/')>=0){
+    var segs=s.split(/\s*\/\s*/).map(function(x){return x.trim();}).filter(function(x){return x!=='';});
+    if(segs.length>=3){
+      out.name=cleanName(segs[0]);
+      var jF=null,wF=null,oth=[],fv={};
+      /* 节次和周次常常贴在课名那一段里：(1-2节)5-17周 */
+      var jt0=jcFrom(segs[0]); if(jt0&&/节/.test(segs[0])) jF=jt0;
+      var wt0=wkFrom(segs[0]); if(wt0&&wt0.length) wF=wt0;
+      for(var k=1;k<segs.length;k++){
+        var sg=segs[k];
+        var fd=fieldOf(sg);
+        if(fd){ if(!fv[fd.k]) fv[fd.k]=fd.v; continue; }
+        var jj=jcFrom(sg), ww=wkFrom(sg);
+        var isJ=!!(jj&&/节/.test(sg)), isW=!!(ww&&ww.length);
+        if(isJ&&!jF) jF=jj;
+        if(isW&&!wF) wF=ww;
+        if(!isJ&&!isW) oth.push(sg);
+      }
+      if(jF){ out.j1=jF[0]; out.j2=jF[1]; }
+      if(wF) out.weeks=wF;
+      for(var m=0;m<oth.length;m++){
+        var o=oth[m];
+        if(!out.place&&looksPlace(o)){ out.place=o; continue; }
+        if(!out.teacher&&looksPerson(o)){ out.teacher=normT(o); continue; }
+      }
+      if(!out.place) out.place=(fv['场地']||fv['地点']||fv['教室']||fv['上课地点']||fv['上课教室']||fv['校区']||'').replace(/\s+/g,'');
+      if(!out.teacher) out.teacher=normT(fv['教师']||fv['老师']||fv['任课教师']||fv['主讲教师']||fv['主讲']||'');
+      if(!out.place){
+        for(var m2=0;m2<oth.length;m2++){
+          var o2=oth[m2];
+          if(/^\d+(\.\d+)?$/.test(o2)) continue;
+          if(/[:：]/.test(o2)) continue;
+          if(/^[\u4e00-\u9fa5A-Za-z]{2,}-\d+$/.test(o2)) continue;
+          if(o2===out.teacher) continue;
+          out.place=o2; break;
+        }
+      }
+      if(out.name) return out;
+      out.name=cleanName(s);
+      return out.name?out:null;
+    }
+  }
+
+  /* B. 键值对：地点：xxx / 教师：xxx / 周次：x-x */
+  var pl=pickLblAt(s,['上课地点','上课教室','地点','场地','教室']);
+  var tc=pickLblAt(s,['任课教师','主讲教师','授课教师','教师','老师']);
+  var wk=pickLblAt(s,['上课周次','周次','周数']);
+  if(pl||tc||wk){
+    out.place=pl; out.teacher=tc;
+    if(wk){ var w0=wkFrom(wk+'周')||wkFrom(wk); if(w0&&w0.length) out.weeks=w0; }
+    var ls=s.split(/\n/).map(function(x){return x.trim();}).filter(Boolean), nm='';
+    for(var i=0;i<ls.length;i++){
+      if(/(?:上课地点|上课教室|地点|教室|任课教师|主讲教师|授课教师|教师|老师|周次|周数)\s*[:：]/.test(ls[i])) continue;
+      nm=ls[i]; break;
+    }
+    out.name=cleanName(nm);
+    var j0=jcFrom(s); if(j0){ out.j1=j0[0]; out.j2=j0[1]; }
+    var w1=wkFrom(s); if(w1&&w1.length) out.weeks=w1;
+    return out.name?out:null;
+  }
+
+  /* C. 单行 */
+  var ls2=s.split(/\n/).map(function(x){return x.trim();}).filter(Boolean);
+  if(ls2.length===1){
+    var one=ls2[0];
+    var j2=jcFrom(one);
+    if(j2&&/节/.test(one)){ out.j1=j2[0]; out.j2=j2[1]; }
+    var w2=wkFrom(one); if(w2&&w2.length) out.weeks=w2;
+    out.name=cleanName(one.replace(/\/.*$/,''));
+    return out.name?out:null;
+  }
+
+  /* D. 多行：课名 / 教学班代码 / 教师 职称 / 周次 教室 */
+  out.name=cleanName(ls2[0]);
+  var rest=ls2.slice(1);
+  if(!out.name&&rest.length) out.name=cleanName(rest.shift());
+  var placeP=[];
+  var TEACHER_RE=/^(.{2,12}?)[\s\u3000]+(讲师|副教授|教授|助教|研究员|副研究员|高级工程师|工程师|高级实验师|实验师|外聘[\u4e00-\u9fa5]*|助理[\u4e00-\u9fa5]*)$/;
+  for(var ri=0;ri<rest.length;ri++){
+    var ln2=rest[ri];
+    /* 整行就是一个括号包着的教学班代码，丢掉 */
+    if(/^[（(].{1,26}[)）]$/.test(ln2)&&!/[楼室馆场周]/.test(ln2)) continue;
+    var mt2=ln2.match(TEACHER_RE);
+    if(mt2&&!out.teacher){ out.teacher=normT(mt2[1]); continue; }
+    var w3=wkFrom(ln2);
+    if(w3&&w3.length){
+      if(!out.weeks.length) out.weeks=w3;
+      var left=ln2.replace(/^[\s\d、,，\-—~至()（）单双]*周/,'').replace(/^[\s,，、；;]+/,'').trim();
+      if(left&&!/^\d+$/.test(left)) placeP.push(left);
+      continue;
+    }
+    placeP.push(ln2);
+  }
+  if(!out.teacher){
+    for(var p=placeP.length-1;p>=0;p--){
+      if(looksPerson(placeP[p])){ out.teacher=normT(placeP[p]); placeP.splice(p,1); break; }
+    }
+  }
+  out.place=placeP.join(' ').replace(/\s+/g,' ').trim();
+  return out.name?out:null;
+}
+/* 复制到剪贴板（WebView 里 clipboard 可能不可用，退回 execCommand） */
+function copyText(txt,okMsg,failMsg){
+  var done=function(){ toast(okMsg,true); };
+  var fail=function(){ toast(failMsg); };
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done,fail);
+      return;
+    }
+  }catch(e){}
+  try{
+    var ta=document.createElement('textarea');
+    ta.value=txt;
+    ta.style.position='fixed'; ta.style.top='-1000px'; ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select(); ta.setSelectionRange(0,txt.length);
+    var ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    ok?done():fail();
+  }catch(e2){ fail(); }
+}
+/* 收尾：拆出「课名@教室」里的教室，以及结尾的 (201教室) */
+function finishCell(co){
+  if(!co||!co.name) return co;
+  var at=co.name.indexOf('@');
+  if(at>0){
+    var p2=co.name.slice(at+1).replace(/^[@\s]+/,'');
+    co.name=co.name.slice(0,at);
+    if(!co.place&&p2) co.place=p2.replace(/\s+/g,' ').trim();
+  }
+  var mm=co.name.match(/^(.+?)[（(]([^)）]{2,})[)）]\s*$/);
+  if(mm&&!co.place&&/(楼|室|馆|场|教\s*\d|\d{2,4})/.test(mm[2])){
+    co.place=mm[2].trim(); co.name=mm[1].trim();
+  }
+  var mt=co.name.match(/^(.{3,})[（(]([\u4e00-\u9fa5]{2,4})[)）]\s*$/);
+  if(mt&&!co.teacher&&!/^(板块|理论|实验|上机|实践|选修|必修|限选|任选|双语|全英|本部|校区)$/.test(mt[2])){
+    co.teacher=mt[2]; co.name=mt[1].trim();
+  }
+  co.name=co.name.replace(/\s+$/,'');
+  return co.name?co:null;
+}
+/* 导不进去时，让用户把这段话连同课表发给 AI */
+function aiPrompt(){
+  if(isEN()){
+    return [
+      'I have a university timetable (file / screenshots below) exported from a school system. Please turn it into one-line-per-class text so I can import it into a phone app.',
+      '',
+      'One class per line, six columns separated by a vertical bar |:',
+      'class name|weekday|period|weeks|room|teacher',
+      '',
+      'Note: the weekday / period / weeks columns stay in Chinese — that is the format the app parses, it is not a display language.',
+      '',
+      'Rules:',
+      '1. weekday — keep it in Chinese: 周一 / 周二 / … / 周日',
+      '2. period — Chinese too: 第1-2节, or 第5节 for a single period',
+      '3. weeks — 1-16周; single weeks only 1-16周(单), double weeks only 2-16周(双), every week 每周',
+      '4. room — building + room number, e.g. 11J2102; leave empty if none',
+      '5. teacher — leave empty if none; keep the empty column between the bars',
+      '6. skip cells marked 无课 (no class)',
+      '7. if one class meets twice a week, output two lines',
+      '8. output only these lines: no header, no explanation, no code block',
+      '',
+      'Example:',
+      '高等数学|周一|第1-2节|5-17周|11J2102|韩雪',
+      '大学英语|周二|第3-4节|1-16周(单)|10J418|邵新光',
+      '体育|周四|第5节|每周||王冉'
+    ].join('\n');
+  }
+  return [
+    '我有一份大学课程表（文件和截图在下面），是教务系统导出的。请帮我整理成一行一门课的文本，我要导入到手机 App 里。',
+    '',
+    '每行一门课，用竖线 | 分成 6 列：',
+    '课程名称|星期|节次|周次|地点|教师',
+    '',
+    '规则：',
+    '1. 星期写 周一 / 周二 / … / 周日',
+    '2. 节次写 第1-2节；只有一节就写 第5节',
+    '3. 周次写 1-16周；只有单周写 1-16周(单)，只有双周写 2-16周(双)；每周都上写 每周',
+    '4. 地点写楼名加房间号，如 11J2102；没有就留空',
+    '5. 教师没有就留空，空的那一列也要保留竖线',
+    '6. 标着「无课」的格子跳过，不要输出',
+    '7. 同一门课一周上几次就输出几行',
+    '8. 只输出这些行：不要表头，不要解释，不要代码块',
+    '',
+    '例子：',
+    '高等数学|周一|第1-2节|5-17周|11J2102|韩雪',
+    '大学英语|周二|第3-4节|1-16周(单)|10J418|邵新光',
+    '体育|周四|第5节|每周||王冉'
+  ].join('\n');
+}
+/* 二维表 → 课程列表。不是网格课表返回 null */
+function parseGridSchedule(rows,sheetName){
+  rows=(rows||[]).map(function(r){ return (r||[]).map(cdNorm); });
+  if(!rows.length) return null;
+
+  /* 1) 找表头行：星期格最多的一行 */
+  var headRow=-1,headMap={},best=0,colMode=true,r,c;
+  for(r=0;r<Math.min(rows.length,25);r++){
+    var map={},n=0;
+    for(c=0;c<rows[r].length;c++){
+      var wd=wdLoose(rows[r][c]);
+      if(wd>=0){ map[c]=wd; n++; }
+    }
+    if(n>best&&n>=2){ best=n; headRow=r; headMap=map; }
+  }
+  if(headRow<0){
+    /* 2) 转置：第一列是星期 */
+    var rmap={},n2=0;
+    for(r=0;r<Math.min(rows.length,25);r++){
+      var w2=wdLoose(rows[r][0]);
+      if(w2>=0&&rows[r].length>2){ rmap[r]=w2; n2++; }
+    }
+    if(n2<2) return null;
+    headRow=-2; headMap=rmap; colMode=false;
+  }
+
+  var list=[],errs=[],perSeen={};
+  var badRow=function(num,col,msg){
+    errs.push(isEN()?(col?('Row '+num+', col '+col+': '+msg):('Row '+num+': '+msg))
+                    :(col?('第 '+num+' 行第 '+col+' 列：'+msg):('第 '+num+' 行：'+msg)));
+  };
+  var isFragment=function(nm){
+    if(!nm||nm.length<2) return true;
+    if(/^\d+(\.\d+)?$/.test(nm)) return true;
+    if(/^[^:：]{0,3}[:：][\d.]+$/.test(nm)) return true;
+    return false;
+  };
+
+  if(colMode){
+    /* 先把每一「节次块」收集起来；同一格里放不下的文字会被挤到下面几行的空单元格，
+       那些续行归属到「上面第一个在相同列上有内容的块」 */
+    var blocks=[];
+    for(r=headRow+1;r<rows.length;r++){
+      var row=rows[r]||[], content={}, lbls=[];
+      for(c=0;c<row.length;c++){
+        if(headMap[c]!=null) content[c]=row[c];
+        else if(row[c]) lbls.push(row[c]);
+      }
+      var lbl=lbls.join(' ');
+      if(!lbl&&!Object.keys(content).length) continue;
+      if(/^\s*(注|说明|备注)/.test(lbl)&&!jcFrom(lbl)) continue;
+      if(/^[■◆★☆※]/.test(lbl)) continue;
+
+      if(!lbls.length){
+        var tgt=null, ck, bi;
+        for(bi=blocks.length-1;bi>=0&&!tgt;bi--){
+          for(ck in content){
+            if(content[ck]&&blocks[bi].cells[ck]){ tgt=blocks[bi]; break; }
+          }
+        }
+        if(tgt){ for(ck in content){ if(content[ck]) tgt.cells[ck]=(tgt.cells[ck]||'')+content[ck]; } }
+        continue;
+      }
+      var cellCopy={};
+      for(var c6 in content) if(content[c6]) cellCopy[c6]=content[c6];
+      blocks.push({row:r+1,lbl:lbl,jt:jcFrom(lbl),tm:tmFrom(lbl),cells:cellCopy});
+    }
+
+    blocks.forEach(function(bk){
+      var cells=bk.cells, jt=bk.jt, k;
+      if(!jt){
+        for(k in cells){ var jx=jcFrom(cells[k]); if(jx&&/节/.test(cells[k])){ jt=jx; break; } }
+      }
+      if(jt&&bk.tm&&bk.tm[0]!=null&&bk.tm[1]!=null&&!perSeen[jt[0]])
+        perSeen[jt[0]]={n:jt[0],s:bk.tm[0],e:bk.tm[1]};
+      var has=false;
+      for(k in cells){ if(cells[k]&&!isNoCls(cells[k])){ has=true; break; } }
+      if(!has) return;
+      if(!jt){ badRow(bk.row,0,isEN()?'period not found':'没认出节次'); return; }
+      for(k in cells){
+        var cell=cells[k];
+        if(!cell||isNoCls(cell)) continue;
+        /* 一格多课：空行分隔 */
+        var parts=String(cell).split(/\n[ \t]*\n+/);
+        for(var pi=0;pi<parts.length;pi++){
+          var one=parts[pi];
+          if(!one||isNoCls(one)) continue;
+          var co=parseGridCell(one,{j1:jt[0],j2:jt[1],weeks:wkFrom(one)||[]});
+          if(!co||isFragment(co.name)){ badRow(bk.row,(+k)+1,isEN()?'no class name':'没认出课程名'); continue; }
+          co=finishCell(co); if(!co) continue;
+          co.wd=headMap[k];
+          list.push(co);
+        }
+      }
+    });
+  }else{
+    for(r=0;r<rows.length;r++){
+      var wRow=headMap[r];
+      if(wRow==null) continue;
+      var rw=rows[r]||[];
+      for(c=1;c<rw.length;c++){
+        var cell2=rw[c];
+        if(!cell2||isNoCls(cell2)) continue;
+        var jt2=jcFrom(cell2)||jcFrom(rows[0]&&rows[0][c]);
+        if(!jt2) continue;
+        var co2=parseGridCell(cell2,{j1:jt2[0],j2:jt2[1],weeks:wkFrom(cell2)||[]});
+        if(!co2||isFragment(co2.name)) continue;
+        co2=finishCell(co2); if(!co2) continue;
+        co2.wd=wRow;
+        list.push(co2);
+      }
+    }
+  }
+
+  /* 学期开始日：只在提到学期/开学的行里找 */
+  var termStart=null;
+  for(r=0;r<rows.length&&!termStart;r++){
+    var tline=(rows[r]||[]).join(' ');
+    if(!/(本学期|开学|正式上课|学期)/.test(tline)) continue;
+    var tm2=tline.match(/(20\d{2})\s*[-年\/.]\s*(\d{1,2})\s*[-月\/.]\s*(\d{1,2})/);
+    if(!tm2) continue;
+    var mm=+tm2[2], dd=+tm2[3];
+    if(mm<1||mm>12||dd<1||dd>31) continue;
+    termStart=tm2[1]+'-'+('0'+mm).slice(-2)+'-'+('0'+dd).slice(-2);
+  }
+  /* 表头日期 + 第N周 → 反推第一周周一 */
+  if(!termStart&&headRow>=0){
+    var wkN=null, mw=(String(sheetName||'')+' '+(rows[0]||[]).join(' ')).match(/第\s*(\d{1,2})\s*周/);
+    if(mw) wkN=+mw[1];
+    var md=null;
+    for(c=0;c<(rows[headRow]||[]).length;c++){
+      var cm=(rows[headRow][c]||'').match(/(\d{1,2})[\/.\-月](\d{1,2})/);
+      if(cm&&+cm[1]>=1&&+cm[1]<=12&&+cm[2]>=1&&+cm[2]<=31){ md=[+cm[1],+cm[2]]; break; }
+    }
+    if(wkN&&md){
+      var y=new Date().getFullYear();
+      var dt=new Date(y,md[0]-1,md[1]), now=new Date();
+      if(dt-now>300*86400000) dt=new Date(y-1,md[0]-1,md[1]);
+      else if(now-dt>300*86400000) dt=new Date(y+1,md[0]-1,md[1]);
+      dt=new Date(dt.getTime()-7*(wkN-1)*86400000);
+      termStart=dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)+'-'+('0'+dt.getDate()).slice(-2);
+    }
+  }
+
+  var periods=[];
+  for(var pn in perSeen){ if(typeof perSeen[pn]==='object') periods.push(perSeen[pn]); }
+  periods.sort(function(a,b){ return a.n-b.n; });
+
+  return {list:list,errs:errs,grid:true,periods:periods,termStart:termStart};
+}
+function sheetToRows(sh){
+  var rows=XLSX.utils.sheet_to_json(sh,{header:1,blankrows:false,raw:false});
+  return (rows||[]).map(function(r){ return (r||[]).map(cdNorm); });
+}
+function rowsToText(rows){
+  return rows.map(function(r){ return (r||[]).join('\t'); }).join('\n');
+}
+function parseAnySheet(rows,name){
+  var g=parseGridSchedule(rows,name);
+  if(g&&g.list.length) return g;
+  var d=parseCourseText(rowsToText(rows));
+  if(g&&g.errs&&g.errs.length&&!d.list.length) d.errs=(g.errs||[]).concat(d.errs||[]);
+  return d;
+}
 /* ---------- 课表导入 / 作息设置 ---------- */
 function weekdayOf(str){
   var m=String(str||'').match(/^(星期|周|礼拜)([一二三四五六日天])$/);
@@ -6145,6 +6676,8 @@ function parseCourseText(txt){
     var ln=raw.replace(/\u00a0/g,' ').trim();
     if(!ln) return;
     if(/序号/.test(ln)&&/课程/.test(ln)) return;
+    if(/课程名称/.test(ln)&&/(星期|节次|教师|地点|周次)/.test(ln)) return;
+    if(/^(以下|上面|说明|注意|注[：:]|共\s*\d|整理后|好的|以下是)/.test(ln)) return;
     var cells=ln.split(/\t+/).map(function(x){return x.trim();});
     if(cells.length<3) cells=ln.split(/[,，;；|]+|\s{2,}/).map(function(x){return x.trim();}).filter(Boolean);
     var wd=-1, wdIdx=-1, i;
@@ -6152,7 +6685,7 @@ function parseCourseText(txt){
     if(wd<0){ if(!/周|节/.test(ln)) return; errs.push((isEN()?'Line '+(idx+1)+': weekday not recognised → ':'第 '+(idx+1)+' 行：没认出星期几 → ')+ln.slice(0,24)); return; }
     var jt=null, jIdx=-1;
     for(i=0;i<cells.length;i++){
-      var m=cells[i].match(/^(\d+)\s*[-—~至]\s*(\d+)\s*节?$/);
+      var m=cells[i].match(/^第?(\d+)\s*[-—~至]\s*(\d+)\s*节$/);
       if(m){ jt=[+m[1],+m[2]]; jIdx=i; break; }
       m=cells[i].match(/^第?(\d+)\s*节$/);
       if(m){ jt=[+m[1],+m[1]]; jIdx=i; break; }
@@ -6160,8 +6693,14 @@ function parseCourseText(txt){
     if(!jt){ errs.push(isEN()?('Line '+(idx+1)+': period not recognised'):('第 '+(idx+1)+' 行：没认出节次')); return; }
     var wk=null, wkIdx=-1;
     for(i=0;i<cells.length;i++){
-      if(i===jIdx) continue;
+      if(i===jIdx||i===wdIdx) continue;
       if(/周/.test(cells[i])&&/\d/.test(cells[i])){ var w=parseWeeks(cells[i]); if(w.length){ wk=w; wkIdx=i; break; } }
+    }
+    if(!wk){
+      for(i=0;i<cells.length;i++){
+        if(i===jIdx||i===wdIdx) continue;
+        if(/^(每周|每周都上|全周|全学期)$/.test(cells[i])){ wk=[]; wkIdx=i; break; }
+      }
     }
     if(!wk){ errs.push(isEN()?('Line '+(idx+1)+': weeks not recognised'):('第 '+(idx+1)+' 行：没认出周次')); return; }
     var name=(wdIdx>0)?cells[wdIdx-1]:'';
@@ -6399,25 +6938,6 @@ function openCourseOf(cid,iso,j1){
     });
   });
 }
-function xlsxToText(wb){
-  var names=wb.SheetNames||[], pick=null, i;
-  for(i=0;i<names.length;i++){ if(/明细|课程表|课程一览/.test(names[i])){ pick=names[i]; break; } }
-  if(!pick){
-    for(i=0;i<names.length;i++){
-      var rows0=XLSX.utils.sheet_to_json(wb.Sheets[names[i]],{header:1,blankrows:false,raw:false});
-      for(var r=0;r<Math.min(rows0.length,8);r++){
-        var line=(rows0[r]||[]).join(' ');
-        if(/课程名称/.test(line)&&/星期/.test(line)){ pick=names[i]; break; }
-      }
-      if(pick) break;
-    }
-  }
-  if(!pick) pick=names[0];
-  var rows=XLSX.utils.sheet_to_json(wb.Sheets[pick],{header:1,blankrows:false,raw:false});
-  return rows.map(function(r){
-    return (r||[]).map(function(c){ return c==null?'':String(c).replace(/\s+/g,' ').trim(); }).join('\t');
-  }).join('\n');
-}
 var __courseParsed=null;
 function openCourseImport(){
   __courseParsed=null;
@@ -6445,7 +6965,7 @@ function openCourseImport(){
     __courseParsed=r;
     var h='';
     if(r.list.length){
-      h+='<div class="hint" style="margin-top:14px">'+UIx('recognized',{n:'<b>'+r.list.length+'</b>'})+'</div>';
+      h+='<div class="hint" style="margin-top:14px">'+UIx('recognized',{n:'<b>'+r.list.length+'</b>'})+(r.grid?UIx('ciGridTag'):'')+'</div>';
       h+='<div class="card" style="margin-top:6px;max-height:250px;overflow:auto">';
       h+=r.list.map(function(c){
         return '<div class="row" style="align-items:flex-start;padding:8px 14px"><div style="flex:1;min-width:0">'+
@@ -6460,16 +6980,67 @@ function openCourseImport(){
       h+='<div class="warn" style="margin-top:10px">'+r.errs.slice(0,6).map(esc).join('<br>')+(r.errs.length>6?'<br>'+(isEN()?('…and '+(r.errs.length-6)+' more'):('…还有 '+(r.errs.length-6)+' 条')):'')+'</div>';
     }
     if(!r.list.length&&!r.errs.length) h+='<div class="hint" style="margin-top:12px">'+(isEN()?'No classes found — check that this file really is a timetable.':'没读到课程，确认一下这个文件是不是课表。')+'</div>';
+    if(!r.list.length||r.errs.length>=Math.max(3,r.list.length)){
+      h+='<div class="card" style="margin-top:12px;padding:14px">'+
+        '<div style="font-size:13.5px;font-weight:600">'+UIx(r.list.length?'ciAiT2':'ciAiT')+'</div>'+
+        '<div class="hint" style="padding:0;margin-top:6px;line-height:1.75">'+UIx('ciAiD')+'</div>'+
+        '<button class="subtle" id="ciAiCopy" style="margin-top:12px;color:var(--accent);font-weight:600;font-size:13.5px">'+UIx('ciAiCopy')+'</button>'+
+        '<div class="hint" style="padding:0;margin-top:16px;font-weight:600;color:var(--text-2)">'+UIx('ciAiPaste')+'</div>'+
+        '<textarea class="f-note" id="ciAiText" style="min-height:118px;margin-top:6px;font-family:ui-monospace,monospace;font-size:12px" placeholder="'+UIx('ciAiPh')+'"></textarea>'+
+        '<button class="subtle" id="ciAiParse" style="margin-top:8px;color:var(--accent);font-weight:600;font-size:13.5px">'+(isEN()?'Parse & preview':'解析并预览')+'</button>'+
+        '</div>';
+    }
     if(r.list.length){
+      var pDiff=(r.periods&&r.periods.length)&&JSON.stringify(r.periods)!==JSON.stringify(S.settings.periods||[]);
+      if(pDiff){
+        var p0=r.periods[0], pN=r.periods[r.periods.length-1];
+        var pSum=(p0.s!=null&&pN.e!=null)?(isEN()?(r.periods.length+' periods, '+hhmm(p0.s)+'–'+hhmm(pN.e)):('共 '+r.periods.length+' 节，'+hhmm(p0.s)+'–'+hhmm(pN.e))):(isEN()?(r.periods.length+' periods'):('共 '+r.periods.length+' 节'));
+        h+='<div class="card" style="margin-top:12px;padding:11px 14px">'+
+          '<label style="display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.5">'+
+          '<input type="checkbox" id="ciPeriod" checked style="margin-top:3px;flex:none">'+
+          '<span>'+UIx('ciPeriodT')+'<span style="color:var(--text-3);font-size:11.5px;display:block;margin-top:1px">'+pSum+'</span></span></label></div>';
+      }
+      if(r.termStart){
+        var sameT=(S.settings.termStart||'')===r.termStart;
+        if(!sameT){
+          h+='<div class="card" style="margin-top:8px;padding:11px 14px">'+
+            '<label style="display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.5">'+
+            '<input type="checkbox" id="ciTerm"'+(S.settings.termStart?'':' checked')+' style="margin-top:3px;flex:none">'+
+            '<span>'+UIx('ciTermT')+'<span style="color:var(--text-3);font-size:11.5px;display:block;margin-top:1px">'+r.termStart+'</span></span></label></div>';
+        }
+      }
       h+='<button class="subtle" id="ciGo" style="margin-top:14px;color:var(--accent);font-weight:600;font-size:14px">'+(isEN()?('Import '+r.list.length+' class'+(r.list.length>1?'es':'')):('确认导入这 '+r.list.length+' 条'))+'</button>';
       h+='<label class="hint" style="display:block;margin-top:10px;padding:0"><input type="checkbox" id="ciRep" style="vertical-align:-2px"> '+(isEN()?'Replace existing classes':'覆盖原有课程')+'</label>';
     }
     $('#ciPrev',sh).innerHTML=h;
+    var aic=$('#ciAiCopy',sh);
+    if(aic) aic.addEventListener('click',function(){
+      copyText(aiPrompt(),UIx('ciAiDone'),isEN()?'Copy failed':'复制失败');
+    });
+    var aip=$('#ciAiParse',sh);
+    if(aip) aip.addEventListener('click',function(){
+      var v=($('#ciAiText',sh)&&$('#ciAiText',sh).value)||'';
+      if(!v.trim()){ toast(isEN()?'Paste something first':'先把 AI 给你的内容粘进来'); return; }
+      var rows=v.split(/\r?\n/).map(function(l){ return l.split(/\t|\s*\|\s*/); });
+      renderPreview(parseAnySheet(rows,'pasted'));
+    });
     var go=$('#ciGo',sh);
     if(go) go.addEventListener('click',function(){
       var rep2=$('#ciRep',sh)&&$('#ciRep',sh).checked;
+      var pOK=$('#ciPeriod',sh)&&$('#ciPeriod',sh).checked;
+      var tOK=$('#ciTerm',sh)&&$('#ciTerm',sh).checked;
       snapshot();
       if(rep2){ S.courses=[]; S.moves=[]; }
+      if(pOK&&__courseParsed.periods&&__courseParsed.periods.length) S.settings.periods=__courseParsed.periods.slice();
+      if(tOK&&__courseParsed.termStart) S.settings.termStart=__courseParsed.termStart;
+      /* 作息节数不足以覆盖课程节次时（换了学校的课表），补到够用，不然那些课不显示 */
+      var maxJ=0;
+      __courseParsed.list.forEach(function(c){ var e=c.j2||c.j1||0; if(e>maxJ) maxJ=e; });
+      if(maxJ>periodsOf().length){
+        var nd=DEFAULT_PERIODS.map(function(x,i){ return {n:i+1,s:toMin(x[0]),e:toMin(x[1])}; });
+        while(nd.length<maxJ){ var lz=nd[nd.length-1]; nd.push({n:nd.length+1,s:(lz.e||600)+10,e:(lz.e||600)+55}); }
+        S.settings.periods=nd;
+      }
       __courseParsed.list.forEach(function(c){ S.courses.push(c); });
       save(); render(); closeSheet();
       toast(UIx('importedN',{n:__courseParsed.list.length}),true);
@@ -6489,8 +7060,16 @@ function openCourseImport(){
     rd.onload=function(){
       try{
         var wb=XLSX.read(new Uint8Array(rd.result),{type:'array'});
-        var txt=xlsxToText(wb);
-        renderPreview(parseCourseText(txt));
+        var names=wb.SheetNames||[], best=null;
+        for(var si=0;si<names.length;si++){
+          var srows=sheetToRows(wb.Sheets[names[si]]);
+          if(!srows.length) continue;
+          var rr=parseAnySheet(srows,names[si]);
+          if(!best||rr.list.length>best.r.list.length
+             ||(rr.list.length===best.r.list.length&&/明细/.test(names[si])&&!/明细/.test(best.name)))
+            best={r:rr,name:names[si]};
+        }
+        renderPreview(best?best.r:{list:[],errs:[]});
       }catch(e){
         $('#ciPrev',sh).innerHTML='<div class="warn">'+(isEN()?'Could not read this file: ':'读不了这个文件：')+esc(e.message||(isEN()?'bad format':'格式不对'))+'</div>';
       }
@@ -6502,7 +7081,8 @@ function openCourseImport(){
     var b=$('#ciManualBox',sh); b.hidden=!b.hidden;
   });
   $('#ciParse',sh).addEventListener('click',function(){
-    renderPreview(parseCourseText($('#ciText',sh).value));
+    var pv=$('#ciText',sh).value||'';
+    renderPreview(parseAnySheet(pv.split(/\r?\n/).map(function(l){ return l.split(/\t/); }),'pasted'));
   });
 }
 function openTermStartHint(){
@@ -6616,7 +7196,9 @@ var HELP=[
 ['课表是怎么进到时间轴里的？',
  '课程不是任务，是背景。导入后它会直接画在日程页的时间轴上，和任务同一条线：\n课程块：虚线描边 + 浅底 + 左侧细色条，不能打勾\n任务块：实底 + 左侧优先级色条，能打勾\n\n课程不占精力、不进任务页、不影响完成率。'],
 ['怎么导入课表？',
- '设置 → 课表 → 导入 → 选 Excel 文件。\n支持 .xlsx / .xls / .csv，会自动找「上课明细」那张表（每行一门课，有课程名称、星期、节次、周次、地点、老师）。\n\n教务系统只能导 PDF 的话，先用 AI 把它转成 Excel，再导入。\n导入前会先列一遍识别结果，认不出的行会单独标出来，不会静默丢掉。'],
+ '设置 → 课表 → 导入 → 选 Excel 文件。\n支持 .xlsx / .xls / .csv，教务系统导出的两种都认：网格课表（星期在表头、纵向是节次）和明细表（一行一门课）。文件里有多张表格时，会自动挑能读出课的那张。\n\n课表里带了作息时间会问你要不要一起更新节次；带了开学日期会问你要不要设成第一周。\n导入前会先列一遍识别结果，认不出的行会单独标出来，不会静默丢掉。'],
+['课表导不进去怎么办？',
+ '先看文件对不对：教务系统里「学生个人课表」导出的 Excel 一般都能认 —— 网格样式的（星期在表头、纵向是节次）和一行一门课的明细表都支持，一个格子里混着课名周次地点老师、一格塞好几门课、文字被切到下一行，也都能拼回来。\n\n如果一门课都没读出来，导入页面下面会出现「让 AI 帮你转一下」：\n① 点「复制这段话」\n② 连同课表文件或截图，一起发给豆包、元宝、DeepSeek 之类的 AI\n③ 把它整理好的内容粘回那一栏，点「解析并预览」\n\n不用自己改 Excel。再不行还有「手动粘贴」，一行一门课贴进去就行：课程名|星期|节次|周次|地点|教师。'],
 ['桌面小组件的课表，和 App 里的一样吗？',
  '不完全一样，它是「导入的那份课表」的缩影，只按课程、周次、作息时间画，不做任何额外计算：\n\n· App 里「这一次换个时间」「停这一次」这类单次调课，不会反映到组件上\n· 组件只显示课，不显示任务和截止事项\n· 周次和 App 里的当前周永远一致，到周一自己翻，不用手动切\n· 组件列表里有三个独立尺寸，按桌面空间挑一个拖出来：4×4（课名 + 地点）、4×5（多一行节次，如 3-4节）、4×6（再多一行开始时间，如 08:00）；三个尺寸都固定，拉不动\n· 一天有几门课就排几行，四五门都不会被挤掉\n· 点组件任意位置都会打开 App\n\n改了大课表就重新导入一次，组件会跟着变；只是偶尔调一节课，组件显示原来的时间是正常的。\n\n另外：打开过一次 App 之后，组件就一直有数据，不开 App 也能显示，每天零点自动更新周次。'],
 ['小组件上的课程名为什么只有两三个字？',
@@ -6716,7 +7298,9 @@ var HELP_EN=[
 ['How do classes get onto the timeline?',
  'Classes are not tasks, they are background. After import they are drawn on the day timeline alongside tasks:\nclass block — dashed border, pale fill, thin colour bar, cannot be ticked\ntask block — solid fill, priority bar, can be ticked\n\nClasses cost no focus, do not appear in Tasks and do not affect the completion rate.'],
 ['How do I import my schedule?',
- 'Settings → Class schedule → Import → choose the Excel file.\n.xlsx / .xls / .csv are supported; it looks for the class-detail sheet (one row per class with name, weekday, periods, weeks, room, teacher).\n\nIf your system only exports PDF, convert it to Excel with an AI tool first.\nYou will see a preview before importing; rows it cannot read are listed, never silently dropped.'],
+ 'Settings → Class schedule → Import → choose the Excel file.\n.xlsx / .xls / .csv are supported; both grid timetables (weekdays across the top, periods down the side) and class-detail sheets (one row per class) work. When the file has several sheets, the one that yields classes is picked automatically.\n\nIf the file carries its own period times or term start date, you are asked whether to apply them.\nYou will see a preview before importing; rows it cannot read are listed, never silently dropped.'],
+['The timetable will not import - what do I do?',
+ 'First check the file itself: the student timetable exported from most school systems is fine - both the grid layout (weekdays across the top, periods down the side) and the one-row-per-class layout. A cell that mixes name, weeks, room and teacher, a cell holding several classes, even text that got pushed onto the next row, all get stitched back together.\n\nIf not a single class is read, an extra block appears at the bottom of the import screen.\n(1) Tap "Copy this text".\n(2) Send it together with your timetable - file or screenshot - to any AI chat: Doubao, Yuanbao, DeepSeek.\n(3) Paste the result into the box and tap "Parse & preview".\n\nYou never have to edit the spreadsheet. "Paste it instead" still works too - one class per line: name|weekday|period|weeks|room|teacher.'],
 ['Is the home widget timetable the same as in the app?',
  'Not exactly — it is a snapshot of the imported timetable: classes are drawn by weekday, periods and week numbers, with no extra calculation.\n\n· One-off changes in the app (“change this once”, “skip this one”) do not show on the widget\n· The widget shows classes only — no tasks or deadlines\n· The week number always matches the current week in the app and rolls over on Monday by itself\n· The widget list has three fixed sizes — pick one for your home screen: 4×4 (class + room), 4×5 (adds the periods, e.g. 3-4节), 4×6 (also adds the start time, e.g. 08:00); all three cannot be resized\n· Every class gets its own row — four or five a day all fit\n· Tapping anywhere on the widget opens the app\n\nImport the timetable again after big changes and the widget follows. An occasionally swapped class showing its original time is expected.\n\nAlso: once you have opened the app, the widget keeps working without opening it — the week number updates by itself at midnight.'],
 ['Why are class names only two or three characters on the widget?',
@@ -7401,6 +7985,8 @@ function openSettings(){
       '<div class="hint">'+UIx('hintBackup')+'</div>'+
       '<button class="danger" id="sWipe">'+tr('Удалить все данные')+'</button>'+
       '<button class="subtle" id="sHelp" style="margin-top:14px;color:var(--accent);font-weight:600">'+UIx('setHelpBtn')+'</button>'+
+      '<div class="row" id="rowUpd"><span class="lbl">'+UIx('checkUpd')+'</span>'+
+        '<span class="tb r" id="updV" style="cursor:pointer">v'+esc(BUILD)+' ›</span></div>'+
       '<div class="hint" style="text-align:center;padding-top:10px;line-height:1.8">'+UIx('author')+'<br>'+
         'Schedule v'+esc(BUILD)+' · '+(isApp()?UIx('verApp'):UIx('verWeb'))+'</div>'+
     '</div>');
@@ -7560,6 +8146,12 @@ function openSettings(){
   if(br) br.addEventListener('click',openBackupList);
   var shb=$('#sHelp',sh);
   if(shb) shb.addEventListener('click',function(){ closeSheet(); setTimeout(openHelp,140); });
+  var updRow=$('#rowUpd',sh);
+  if(updRow) updRow.addEventListener('click',function(){
+    if(updLatest&&+updLatest.code>VCODE) openUpdSheet(updLatest);
+    else updCheck(false);
+  });
+  updPaint();
   $('#sWipe',sh).addEventListener('click',function(){
     if(!confirm(tr('Удалить все дела и настройки?')))return;
     forceSnap(); snapshot(); S.tasks=[]; S.settings=Object.assign({},DEF);
@@ -7806,6 +8398,91 @@ function checkUpdate(){
     })
     .catch(function(){});
 }
+
+/* ---------- 检查更新（走原生请求，不受 NET_ON 影响） ---------- */
+var UPD_AT='planly.updAt', UPD_SHOWN='planly.updShown', UPD_GAP=24*3600*1000;
+var updBusy=false, updLatest=null, updQuiet=false;
+
+function updAt(){ try{ return +(localStorage.getItem(UPD_AT)||0); }catch(e){ return 0; } }
+function updShownVer(){ try{ return localStorage.getItem(UPD_SHOWN)||''; }catch(e){ return ''; } }
+function updMark(){ try{ localStorage.setItem(UPD_AT, String(Date.now())); }catch(e){} }
+
+function updPaint(){
+  var el=document.getElementById('updV'); if(!el) return;
+  if(updLatest&&+updLatest.code>VCODE){
+    el.textContent=T(updLatest.version+' 可更新','v'+updLatest.version+' available');
+    el.style.color='var(--accent)'; el.style.fontWeight='600';
+  } else {
+    el.textContent='v'+BUILD+' ›';
+    el.style.color='var(--text-3)'; el.style.fontWeight='400';
+  }
+}
+
+function openUpdSheet(info){
+  var sh=openSheet(
+    '<div class="sh-h"><button class="tb" id="updClose">'+UIx('close')+'</button>'+
+      '<div class="t">'+T('发现新版本','Update available')+'</div><span class="tb r"></span></div>'+
+    '<div class="sh-b">'+
+      '<div class="card" style="padding:16px 16px 18px">'+
+        '<div style="font-size:23px;font-weight:700;letter-spacing:.3px">v'+esc(info.version)+'</div>'+
+        '<div class="hint" style="padding-top:5px">'+T('当前版本 v'+BUILD,'You are on v'+BUILD)+'</div>'+
+        (info.notes? '<div style="margin-top:13px;font-size:13px;line-height:1.85;white-space:pre-wrap">'+esc(info.notes)+'</div>':'')+
+      '</div>'+
+      '<button id="updGo" style="margin-top:4px;width:100%;padding:15px;border:0;border-radius:13px;'+
+        'background:var(--accent);color:#fff;font-size:15px;font-weight:600;font-family:inherit">'+
+        T('去下载','Download')+'</button>'+
+      '<div class="hint" style="text-align:center;line-height:1.7">'+
+        T('下载后直接覆盖安装，数据不会丢。\n安装时若提示「未备案」，点继续安装即可。',
+          'Install over the current app — your data stays.\nIf the system warns about filing, just continue.')+
+      '</div>'+
+    '</div>');
+  document.getElementById('updClose').addEventListener('click',closeSheet);
+  document.getElementById('updGo').addEventListener('click',function(){
+    var b=nativeApp();
+    if(b&&b.openUrl) b.openUrl(info.url||'');
+    else if(info.url) location.href=info.url;
+  });
+}
+
+function updCheck(silent){
+  var b=nativeApp();
+  if(!b||!b.checkUpdate){
+    if(!silent) toast(T('浏览器里不支持检查更新','Update check works in the app only'));
+    return;
+  }
+  if(updBusy) return;
+  updBusy=true; updQuiet=!!silent;
+  if(!silent) toast(T('正在检查…','Checking…'));
+  try{ b.checkUpdate(); }catch(e){ updBusy=false; }
+}
+
+/* 原生回调统一走这里（定义在全局，Java 先回调也不会丢） */
+window.__onUpdate=function(raw){
+  try{
+    if(!updBusy&&!raw) return;
+    updBusy=false; updMark();
+    var info=null;
+    try{ info=raw?JSON.parse(raw):null; }catch(e){ info=null; }
+    if(!info||!info.code){
+      if(!updQuiet) toast(T('检查失败，网络不通或版本文件读不到','Check failed — network or version file unavailable'));
+      return;
+    }
+    if(+info.code>VCODE){
+      updLatest=info;
+      updPaint();
+      if(!updQuiet) openUpdSheet(info);
+      if(updQuiet&&updShownVer()!==String(info.version)){
+        try{ localStorage.setItem(UPD_SHOWN,String(info.version)); }catch(e){}
+        toast(T('有新版本 '+info.version+' · 设置里可更新','Version '+info.version+' available in Settings'));
+      }
+    } else {
+      updLatest=null;
+      updPaint();
+      if(!updQuiet) toast(T('已是最新版本','You are on the latest version'));
+    }
+  }catch(e){}
+};
+window.__onUpdateSheet=function(){ if(updLatest) openUpdSheet(updLatest); };
 
 /* ---------- theme / views / nav ---------- */
 var themeStamped=false;
@@ -8071,6 +8748,9 @@ setInterval(function(){
   if(todayISO()!==__dayMark){ __dayMark=todayISO(); resetDailyDone(); resetPeriodDone(); save(); render(); toast(T('新的一天 · 精力回到 100','New day · energy back to 100')); }
 },60000);
 $('#ddlBar').addEventListener('click',function(){ setView('list'); });
+setTimeout(function(){
+  try{ if(Date.now()-updAt()>UPD_GAP) updCheck(true); }catch(e){}
+}, 5000);
 checkReminders();
 setInterval(checkReminders,30000);
 setMode(S.settings.mode);

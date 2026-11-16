@@ -13,6 +13,12 @@ public class BootReceiver extends BroadcastReceiver {
                 || Intent.ACTION_MY_PACKAGE_REPLACED.equals(a)
                 || "android.intent.action.QUICKBOOT_POWERON".equals(a)) {
             AlarmSync.set(c, AlarmSync.load(c), false);
+            /* 开机后组件的每日闹钟也丢了，一起补回来；顺手重画一次，免得停在关机前的周次 */
+            try {
+                WidgetProvider.refreshAll(c);
+                WidgetProvider.scheduleDaily(c);
+            } catch (Exception ignored) {
+            }
         }
     }
 }

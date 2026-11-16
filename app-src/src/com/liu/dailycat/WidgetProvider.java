@@ -89,26 +89,45 @@ public class WidgetProvider extends AppWidgetProvider {
                         .edit().putInt("cnt", total).apply();
             } catch (Exception ignored) {
             }
+            scheduleDaily(c);   /* 幂等，只是把明天的闹钟重排一遍 */
         } catch (Exception ignored) {
         }
     }
 
-    private static void scheduleDaily(Context c) {
+    /** 每天 00:05 和 12:05 各刷一次。用 RTC_WAKEUP + setExactAndAllowWhileIdle，
+     *  否则 Doze 会把闹钟推到维护窗口，跨零点那一次翻周就漏了。 */
+    public static void scheduleDaily(Context c) {
         try {
             android.app.AlarmManager am =
                     (android.app.AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
             if (am == null) return;
             Intent it = new Intent(c, WidgetProvider.class);
             it.setAction(TICK);
-            PendingIntent pi = PendingIntent.getBroadcast(c, 7011, it,
+            arm(am, c, it, 7011, 0);
+            arm(am, c, it, 7012, 12);
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static void arm(android.app.AlarmManager am, Context c, Intent it, int req, int hour) {
+        try {
+            PendingIntent pi = PendingIntent.getBroadcast(c, req, it,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             Calendar t = Calendar.getInstance();
             t.add(Calendar.DAY_OF_YEAR, 1);
-            t.set(Calendar.HOUR_OF_DAY, 0);
+            t.set(Calendar.HOUR_OF_DAY, hour);
             t.set(Calendar.MINUTE, 5);
             t.set(Calendar.SECOND, 0);
             t.set(Calendar.MILLISECOND, 0);
-            am.set(android.app.AlarmManager.RTC, t.getTimeInMillis(), pi);
+            long at = t.getTimeInMillis();
+            try {
+                if (android.os.Build.VERSION.SDK_INT >= 23)
+                    am.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, at, pi);
+                else
+                    am.setExact(android.app.AlarmManager.RTC_WAKEUP, at, pi);
+            } catch (Exception e2) {
+                am.set(android.app.AlarmManager.RTC_WAKEUP, at, pi);
+            }
         } catch (Exception ignored) {
         }
     }

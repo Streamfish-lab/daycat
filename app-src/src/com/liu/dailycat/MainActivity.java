@@ -46,12 +46,18 @@ public class MainActivity extends Activity {
 
     /** 版本信息地址：改成你自己的仓库地址即可。
      *  jsDelivr 是 GitHub 的 CDN 镜像，国内可访问；主地址不通时可换 raw.githubusercontent.com */
-    private static final String UPDATE_URL =
-            "https://cdn.jsdelivr.net/gh/Streamfish-lab/daycat@main/version.json";
+    private static final String[] UPDATE_URLS = {
+            "https://cdn.jsdelivr.net/gh/Streamfish-lab/daycat@main/version.json",
+            "https://fastly.jsdelivr.net/gh/Streamfish-lab/daycat@main/version.json",
+            "https://raw.githubusercontent.com/Streamfish-lab/daycat/main/version.json"
+    };
 
     private static final String HOST = "https://app.local/";
     private WebView web;
     private ValueCallback<Uri[]> filePathCallback;
+    private boolean pendingInstall = false;      // 去过「未知来源安装」授权页，回来接着装
+    private volatile boolean dlRunning = false;  // 正在下载新版
+    private volatile boolean dlStop = false;     // 下载取消标记
     private static final int REQ_FILE = 4321;
 
     @Override
@@ -198,6 +204,50 @@ public class MainActivity extends Activity {
         super.onResume();
         // 回到前台时让页面重新登记一次闹钟（划掉 App 会被系统清掉闹钟，重开即恢复）
         callJs("window.__resyncAlarms&&window.__resyncAlarms()");
+        // 进前台就把小组件重画一次：用户打开 App 一定看到最新的今天。
+        // 重画要出位图压 WebP，放子线程，别卡住进页面。
+        final android.content.Context _wc = this;
+        new Thread(new Runnable() {
+            public void run() {
+                try { WidgetProvider.refreshAll(_wc); } catch (Exception ignored) { }
+            }
+        }).start();
+        // 刚从「允许安装未知应用」授权页回来：已经给了权限就直接把安装器拉起来
+        if (pendingInstall) {
+            pendingInstall = false;
+            if (Build.VERSION.SDK_INT < 26 || getPackageManager().canRequestPackageInstalls()) {
+                installApkInternal();
+            }
+        }
+    }
+
+    /** 拉起系统安装器；没给「未知应用」权限就先跳设置页，回来由 onResume 接着装 */
+    private void installApkInternal() {
+        try {
+            java.io.File f = new java.io.File(ApkProvider.dirOf(this), ApkProvider.FILE_NAME);
+            if (!f.exists() || f.length() < 20000) return;
+            if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
+                pendingInstall = true;
+                Intent it = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        Uri.parse("package:" + getPackageName()));
+                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(it);
+                return;
+            }
+            Uri uri = ApkProvider.uriOf(ApkProvider.FILE_NAME);
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setDataAndType(uri, "application/vnd.android.package-archive");
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        } catch (Exception e) {
+            try {
+                Uri uri = ApkProvider.uriOf(ApkProvider.FILE_NAME);
+                Intent i = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                i.setData(uri);
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+            } catch (Exception ignored) { }
+        }
     }
 
     @Override
@@ -382,31 +432,64 @@ public class MainActivity extends Activity {
             }
         }
 
+        /** 从版本文件里抠出 code；抠不到返回 -1 */
+        private int codeOf(String json) {
+            try {
+                int i = json.indexOf("\"code\"");
+                if (i < 0) return -1;
+                int c = json.indexOf(':', i);
+                if (c < 0) return -1;
+                int j = c + 1;
+                StringBuilder sb = new StringBuilder();
+                while (j < json.length()) {
+                    char ch = json.charAt(j);
+                    if (ch >= '0' && ch <= '9') { sb.append(ch); j++; }
+                    else if (sb.length() > 0) break;
+                    else if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r') j++;
+                    else break;
+                }
+                return sb.length() > 0 ? Integer.parseInt(sb.toString()) : -1;
+            } catch (Exception e) {
+                return -1;
+            }
+        }
+
         /** 检查更新：原生发请求，避开 WebView 的跨域限制。结果回调 window.__onUpdate(json|null) */
         @JavascriptInterface
         public void checkUpdate() {
             new Thread(new Runnable() {
                 public void run() {
+                    // 三条线路全查一遍，取 code 最大的那份。
+                    // 原因：jsDelivr 对 @main 有约 12 小时缓存，刚发版时它可能还吐旧版，
+                    // 而 raw.githubusercontent 是没有缓存的——只认"第一个成功的"会拿不到新版。
                     String body = null;
-                    java.net.HttpURLConnection c = null;
-                    try {
-                        c = (java.net.HttpURLConnection) new java.net.URL(UPDATE_URL).openConnection();
-                        c.setConnectTimeout(8000);
-                        c.setReadTimeout(8000);
-                        c.setInstanceFollowRedirects(true);
-                        c.setRequestProperty("User-Agent", "Schedule-UpdateCheck");
-                        if (c.getResponseCode() == 200) {
-                            java.io.InputStream in = c.getInputStream();
-                            java.io.ByteArrayOutputStream bo = new java.io.ByteArrayOutputStream();
-                            byte[] buf = new byte[4096];
-                            int n;
-                            while ((n = in.read(buf)) > 0) bo.write(buf, 0, n);
-                            in.close();
-                            body = bo.toString("UTF-8");
+                    int bestCode = -1;
+                    for (int k = 0; k < UPDATE_URLS.length; k++) {
+                        java.net.HttpURLConnection c = null;
+                        try {
+                            c = (java.net.HttpURLConnection) new java.net.URL(UPDATE_URLS[k]).openConnection();
+                            c.setConnectTimeout(5000);
+                            c.setReadTimeout(5000);
+                            c.setInstanceFollowRedirects(true);
+                            c.setRequestProperty("User-Agent", "Schedule-UpdateCheck");
+                            c.setRequestProperty("Cache-Control", "no-cache");
+                            if (c.getResponseCode() == 200) {
+                                java.io.InputStream in = c.getInputStream();
+                                java.io.ByteArrayOutputStream bo = new java.io.ByteArrayOutputStream();
+                                byte[] buf = new byte[4096];
+                                int n;
+                                while ((n = in.read(buf)) > 0) bo.write(buf, 0, n);
+                                in.close();
+                                String t = bo.toString("UTF-8");
+                                if (t != null && t.indexOf('{') >= 0) {   // 防止拿到错误页
+                                    int cd = codeOf(t);
+                                    if (cd > bestCode) { bestCode = cd; body = t; }
+                                }
+                            }
+                        } catch (Exception ignored) {
+                        } finally {
+                            try { if (c != null) c.disconnect(); } catch (Exception ignored) {}
                         }
-                    } catch (Exception ignored) {
-                    } finally {
-                        try { if (c != null) c.disconnect(); } catch (Exception ignored) {}
                     }
                     final String res = body;
                     runOnUiThread(new Runnable() {
@@ -421,6 +504,132 @@ public class MainActivity extends Activity {
                     });
                 }
             }).start();
+        }
+
+        /* ---------------- 应用内下载新版：不再跳浏览器 ---------------- */
+
+        /** 按顺序试 urls 里的每条线路，成功一个就停。回调 __onDlProgress / __onDlDone / __onDlFail */
+        @JavascriptInterface
+        public void downloadApk(final String urlsJson) {
+            if (dlRunning) return;
+            dlRunning = true;
+            dlStop = false;
+            final java.io.File dir = ApkProvider.dirOf(MainActivity.this);
+            final java.io.File out = new java.io.File(dir, ApkProvider.FILE_NAME);
+            final java.io.File part = new java.io.File(dir, "Schedule.part");
+            new Thread(new Runnable() {
+                public void run() {
+                    String lastErr = "所有线路都不通";
+                    try {
+                        org.json.JSONArray arr = new org.json.JSONArray(urlsJson);
+                        for (int i = 0; i < arr.length(); i++) {
+                            if (dlStop) { lastErr = "已取消"; break; }
+                            String u = arr.optString(i, "");
+                            if (u == null || u.length() < 10) continue;
+                            callJs("window.__onDlProgress&&window.__onDlProgress(0)");
+                            String err = fetchApk(u, part, out);
+                            if (err == null) {
+                                dlRunning = false;
+                                callJs("window.__onDlDone&&window.__onDlDone()");
+                                return;
+                            }
+                            lastErr = err;
+                        }
+                    } catch (Exception e) {
+                        lastErr = "下载出错";
+                    }
+                    try { part.delete(); } catch (Exception ignored) { }
+                    dlRunning = false;
+                    callJs("window.__onDlFail&&window.__onDlFail(" + JSONObject.quote(lastErr) + ")");
+                }
+            }).start();
+        }
+
+        /** 返回 null = 成功；否则返回失败原因 */
+        private String fetchApk(String u, java.io.File part, java.io.File out) {
+            java.net.HttpURLConnection c = null;
+            java.io.FileOutputStream fo = null;
+            try {
+                c = (java.net.HttpURLConnection) new java.net.URL(u).openConnection();
+                c.setConnectTimeout(9000);
+                c.setReadTimeout(15000);
+                c.setInstanceFollowRedirects(true);
+                c.setRequestProperty("User-Agent",
+                        "Mozilla/5.0 (Linux; Android 13) Schedule-Updater");
+                c.setRequestProperty("Accept", "*/*");
+                int code = c.getResponseCode();
+                if (code != 200) return "线路无响应 " + code;
+                long total = c.getContentLength();
+                InputStream in = c.getInputStream();
+                fo = new java.io.FileOutputStream(part);
+                byte[] buf = new byte[16384];
+                long got = 0;
+                int n, lastPct = -1;
+                while ((n = in.read(buf)) > 0) {
+                    if (dlStop) { try { fo.close(); } catch (Exception ignored) { } return "已取消"; }
+                    fo.write(buf, 0, n);
+                    got += n;
+                    if (total > 0) {
+                        int pct = (int) (got * 100 / total);
+                        if (pct >= lastPct + 2 || pct >= 100) {
+                            lastPct = pct;
+                            callJs("window.__onDlProgress&&window.__onDlProgress(" + pct + ")");
+                        }
+                    } else if (got / 65536 != lastPct) {
+                        lastPct = (int) (got / 65536);
+                        callJs("window.__onDlProgress&&window.__onDlProgress(-1)");
+                    }
+                }
+                in.close();
+                fo.close();
+                fo = null;
+                if (got < 20000) { try { part.delete(); } catch (Exception ignored) { } return "拿到的文件太小"; }
+                // 校验：APK 本质是 zip，开头两字节必须是 PK，防止下回来一个报错页
+                byte[] head = new byte[2];
+                java.io.FileInputStream fi = new java.io.FileInputStream(part);
+                int r = fi.read(head);
+                fi.close();
+                if (r < 2 || head[0] != 'P' || head[1] != 'K') {
+                    try { part.delete(); } catch (Exception ignored) { }
+                    return "下回来的不是安装包";
+                }
+                if (out.exists()) out.delete();
+                if (!part.renameTo(out)) return "写入失败";
+                return null;
+            } catch (Exception e) {
+                return "连接超时";
+            } finally {
+                try { if (fo != null) fo.close(); } catch (Exception ignored) { }
+                try { if (c != null) c.disconnect(); } catch (Exception ignored) { }
+            }
+        }
+
+        /** 本地是否已经有下好的安装包；有则返回字节数 */
+        @JavascriptInterface
+        public String apkReady() {
+            try {
+                java.io.File f = new java.io.File(ApkProvider.dirOf(MainActivity.this), ApkProvider.FILE_NAME);
+                return (f.exists() && f.length() > 20000) ? String.valueOf(f.length()) : "";
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        @JavascriptInterface
+        public void installApk() {
+            runOnUiThread(new Runnable() {
+                public void run() { installApkInternal(); }
+            });
+        }
+
+        @JavascriptInterface
+        public void stopDownload() {
+            dlStop = true;
+        }
+
+        @JavascriptInterface
+        public boolean isDownloading() {
+            return dlRunning;
         }
 
         /** 用系统浏览器打开链接（下载新版 APK） */

@@ -127,22 +127,49 @@ scripts/
 
 ## 检查更新
 
-App 启动 5 秒后自动查一次（24 小时内不重复），设置页也有「检查更新」可以手动点。
-发现新版本会弹窗显示版本号、更新说明和「去下载」按钮，点了用系统浏览器打开下载页。
+自动检查的时机：**启动后 8 秒**、**每次应用回到前台**、以及运行中**每 2 小时**各看一眼；
+查通一次之后 6 小时内不再重复。查询失败不占用冷却，20 分钟后就会重试。
+
+发现新版本时，首页底部会出现一条常驻提示条（可点 × 关闭）；设置页的「检查更新」也能手动触发。
+
+**下载不跳浏览器**：点「下载并安装」由应用自己下载（带进度条），下完自动拉起系统安装器。
+下载有多条线路，一条不通自动换下一条：
+
+```
+gh-proxy 加速 → GitHub 直链 → ghproxy 备用
+```
+
+全部不通时，面板上还有「用浏览器打开」和「复制下载链接」两个兜底。
 
 判断依据是 `version.json` 里的 `code` 和当前 `versionCode` 比较（不是比字符串）：
 
 ```json
-{ "version": "2.0.7", "code": 121,
-  "url": "https://github.com/<你>/<仓库>/releases/latest/download/Schedule.apk",
-  "notes": "更新说明，换行用 \n" }
+{
+  "version": "2.0.44",
+  "code": 158,
+  "url": "https://gh-proxy.com/https://github.com/<你>/<仓库>/releases/latest/download/Schedule.apk",
+  "mirrors": [
+    "https://github.com/<你>/<仓库>/releases/latest/download/Schedule.apk",
+    "https://ghproxy.net/https://github.com/<你>/<仓库>/releases/latest/download/Schedule.apk"
+  ],
+  "notes": "更新说明，换行用 \n"
+}
 ```
 
-**两处地址要一起改**（改了仓库名或迁移了文件位置时）：
+> `url` 是主线路，`mirrors` 是可选的备用线路数组，按顺序挨个试。
+> 如果其中写的是 `https://github.com/...`，前端会自动再套一层 `gh-proxy.com`
+> 和 `ghproxy.net` 做备份，所以不写这两个前缀也行。
 
-1. `app-src/src/com/liu/dailycat/MainActivity.java` 里的 `UPDATE_URL`
-   —— 默认走 jsDelivr 镜像：`https://cdn.jsdelivr.net/gh/<你>/<仓库>@main/version.json`
-2. 仓库根目录 `version.json` 的 `url` 字段 —— 建议用 `releases/latest/download/` 这种形式，永远指向最新版
+**为什么要用 gh-proxy 包一层**：GitHub Release 真正的下载域名是
+`objects.githubusercontent.com`，国内经常连不上。直接给用户原始的 github.com 链接，
+十有八九是打开一片白屏。
+
+**版本文件本身的地址**放在 `MainActivity.java` 的 `UPDATE_URLS` 数组里，
+依次是 jsDelivr、fastly.jsdelivr、raw.githubusercontent，一个不通换下一个。
+换了仓库名要跟着改这里。
+
+>>> 发布新版时，**仓库根目录的 `version.json` 必须一起更新，且 `code` 要等于新 APK 的
+`versionCode`**。这一步漏了，所有用户都收不到更新提醒。
 
 请求由原生 `HttpURLConnection` 发出（不是 WebView 里的 fetch），所以没有跨域问题，
 也不受前端 `NET_ON` 开关影响。只发一个 GET、不带任何用户数据。

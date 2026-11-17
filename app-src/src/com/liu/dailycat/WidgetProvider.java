@@ -68,6 +68,15 @@ public class WidgetProvider extends AppWidgetProvider {
             if (TICK.equals(a)) {
                 refreshAll(c);
                 scheduleDaily(c);
+            } else if (Intent.ACTION_DATE_CHANGED.equals(a)
+                    || Intent.ACTION_TIME_CHANGED.equals(a)
+                    || Intent.ACTION_TIMEZONE_CHANGED.equals(a)) {
+                /* 跨日 / 手动改时间 / 换时区。
+                   注意：Android 8.0 起静态注册收不到 DATE_CHANGED 这类隐式广播，
+                   这条路径只是老系统上的额外保险；真正保证每天翻页的是
+                   scheduleDaily() 排的 00:05 / 06:05 / 12:05 三个闹钟，
+                   以及 appwidget 的 30 分钟周期刷新。 */
+                refreshAll(c);
             }
         } catch (Exception ignored) {
         }
@@ -94,8 +103,12 @@ public class WidgetProvider extends AppWidgetProvider {
         }
     }
 
-    /** 每天 00:05 和 12:05 各刷一次。用 RTC_WAKEUP + setExactAndAllowWhileIdle，
-     *  否则 Doze 会把闹钟推到维护窗口，跨零点那一次翻周就漏了。 */
+    /** 每天 00:05 / 06:05 / 12:05 各刷一次。用 RTC_WAKEUP + setExactAndAllowWhileIdle，
+     *  否则 Doze 会把闹钟推到维护窗口，跨零点那一次翻周就漏了。
+     *
+     *  为什么是三个时刻：国产 ROM 的省电策略偶尔会吞掉一次闹钟，只排一个点的话，
+     *  被吞掉的那天小组件就会一直停在昨天。06:05 是给「早八」兜的底——
+     *  就算 0 点那次没响，起床时也一定是对的一天。 */
     public static void scheduleDaily(Context c) {
         try {
             android.app.AlarmManager am =
@@ -104,9 +117,31 @@ public class WidgetProvider extends AppWidgetProvider {
             Intent it = new Intent(c, WidgetProvider.class);
             it.setAction(TICK);
             arm(am, c, it, 7011, 0);
+            arm(am, c, it, 7013, 6);
             arm(am, c, it, 7012, 12);
         } catch (Exception ignored) {
         }
+    }
+
+    /** 最后一个组件被移除时，把每日闹钟撤掉，不再空唤醒 */
+    @Override
+    public void onDisabled(Context c) {
+        try {
+            android.app.AlarmManager am =
+                    (android.app.AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
+            if (am != null) {
+                Intent it = new Intent(c, WidgetProvider.class);
+                it.setAction(TICK);
+                int[] reqs = {7011, 7012, 7013};
+                for (int r : reqs) {
+                    PendingIntent pi = PendingIntent.getBroadcast(c, r, it,
+                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    if (pi != null) am.cancel(pi);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        super.onDisabled(c);
     }
 
     private static void arm(android.app.AlarmManager am, Context c, Intent it, int req, int hour) {
@@ -114,11 +149,15 @@ public class WidgetProvider extends AppWidgetProvider {
             PendingIntent pi = PendingIntent.getBroadcast(c, req, it,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             Calendar t = Calendar.getInstance();
-            t.add(Calendar.DAY_OF_YEAR, 1);
             t.set(Calendar.HOUR_OF_DAY, hour);
             t.set(Calendar.MINUTE, 5);
             t.set(Calendar.SECOND, 0);
             t.set(Calendar.MILLISECOND, 0);
+            /* 算「下一个 hour:05」：今天这个点还没到就排今天，到了才顺延到明天。
+               原来是无条件 +1 天，在 00:00–00:05 之间被调用时会把当天那次直接跳过。 */
+            if (t.getTimeInMillis() <= System.currentTimeMillis()) {
+                t.add(Calendar.DAY_OF_YEAR, 1);
+            }
             long at = t.getTimeInMillis();
             try {
                 if (android.os.Build.VERSION.SDK_INT >= 23)

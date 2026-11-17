@@ -1458,7 +1458,11 @@ body.nosel{user-select:none;-webkit-user-select:none}
 button,input,textarea,select{font:inherit;color:inherit}
 button{background:none;border:0;padding:0;cursor:pointer}
 
-.app{display:flex;flex-direction:column;height:100dvh;max-width:760px;margin:0 auto;position:relative;background:var(--bg)}
+.compat-bar{display:flex;align-items:center;margin:8px 14px 0;padding:9px 12px;border-radius:12px;
+  background:var(--chip-2);color:var(--text-2);font-size:12.5px;line-height:1.45}
+.compat-bar span{flex:1}
+.compat-bar button{flex:none;margin-left:8px;color:var(--accent);font-weight:600;font-size:12.5px}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:760px;margin:0 auto;position:relative;background:var(--bg)}
 @media(min-width:800px){.app{border-left:1px solid var(--sep);border-right:1px solid var(--sep)}}
 .view{flex:1;min-height:0;display:none;flex-direction:column}
 .view.on{display:flex}
@@ -1539,7 +1543,9 @@ html,body{transition:background-color .28s ease,color .28s ease}
 /* панель форматирования снизу, над клавиатурой — как в Заметках iPhone */
 .ntoolbar{position:fixed;left:0;right:0;bottom:var(--kb,0px);z-index:30;display:flex;align-items:center;gap:6px;
   padding:8px 12px calc(8px + var(--sb));border-top:.5px solid var(--sep);
-  background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(20px)}
+  background:var(--bg);
+  background:color-mix(in srgb,var(--bg) 92%,transparent);
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
 body.kb .ntoolbar{padding-bottom:8px}
 .ntoolbar button{flex:none;min-width:42px;height:36px;padding:0 12px;border-radius:9px;background:var(--chip);
   font-size:15px;color:var(--text);display:grid;place-items:center;transition:background .12s}
@@ -1576,7 +1582,7 @@ body.kb .fmtpop{bottom:calc(var(--kb,0px) + 60px)}
 .swatches{display:flex;gap:10px;padding:4px 4px 2px;flex-wrap:wrap}
 .sw-c{width:30px;height:30px;border-radius:50%;background:rgb(var(--c));position:relative;transition:transform .12s}
 .sw-c:active{transform:scale(.9)}
-.sw-c.on::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgb(var(--c))}
+.sw-c.on::after{content:'';position:absolute;top:-4px;right:-4px;bottom:-4px;left:-4px;inset:-4px;border-radius:50%;border:2px solid rgb(var(--c))}
 
 /* ---- переключатель режима дня ---- */
 .viewseg{display:flex;background:var(--chip);border-radius:10px;padding:2px;gap:2px;flex:none}
@@ -1642,6 +1648,9 @@ html[lang="en"] .block.narrow .btm,html[lang="en"] .cblock.narrow .btm{width:33p
 .block::before{content:'';position:absolute;left:4px;top:5px;bottom:5px;width:3px;border-radius:2px;background:var(--bar,var(--gray))}
 /* 课程块：虚线描边 + 浅底，和任务块区分 */
 .cblock{position:absolute;border-radius:12px;padding:5px 8px 5px 42px;overflow:hidden;
+  /* 低版本 WebView 不认 color-mix，先用 var(--block) 顶住，否则课程块是透明的 */
+  background:var(--block);
+  box-shadow:inset 0 0 0 1px var(--sep, rgba(0,0,0,.12));
   background:color-mix(in srgb,var(--cc) 15%,transparent);
   box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cc) 45%,transparent);
   border-left:3px solid var(--cc);touch-action:pan-y}
@@ -1822,7 +1831,9 @@ body.reorder .list{min-height:44px;outline:1px dashed var(--sep);outline-offset:
 .item .ic{flex:1;min-width:0}
 .item .it{font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item .pdok{font-style:normal;font-size:10.5px;font-weight:700;color:var(--accent);margin-left:7px;
-  padding:1.5px 7px;border-radius:7px;background:color-mix(in srgb,var(--accent) 13%,transparent);
+  padding:1.5px 7px;border-radius:7px;
+  background:var(--chip-2);
+  background:color-mix(in srgb,var(--accent) 13%,transparent);
   vertical-align:2px;letter-spacing:0}
 .item.cycdone .it{color:var(--text)}
 .item .im{font-size:12px;color:var(--text-2);margin-top:2px}
@@ -1842,8 +1853,12 @@ body.reorder .list{min-height:44px;outline:1px dashed var(--sep);outline-offset:
 
 /* ---- tabbar + fab ---- */
 body.note-open .tabbar{display:none}
-.tabbar{display:flex;margin:0 12px calc(10px + var(--sb));background:color-mix(in srgb,var(--surface) 92%,transparent);
-  border:1px solid var(--sep);border-radius:23px;padding:7px 2px 6px;backdrop-filter:blur(18px);
+body.note-open .updbar{display:none}
+.tabbar{display:flex;margin:0 12px calc(10px + var(--sb));
+  background:var(--surface);
+  background:color-mix(in srgb,var(--surface) 92%,transparent);
+  border:1px solid var(--sep);border-radius:23px;padding:7px 2px 6px;
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
   box-shadow:0 14px 34px -24px rgba(96,84,64,.9),0 1px 0 rgba(255,255,255,.6) inset}
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px 0 2px;color:var(--text-3);font-size:10px;min-width:0;letter-spacing:.2px}
 .tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round;
@@ -1855,13 +1870,13 @@ body.note-open .tabbar{display:none}
 .fab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
 
 /* ---- sheet ---- */
-.bd{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40;animation:fade .2s}
+.bd{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:rgba(0,0,0,.35);z-index:40;animation:fade .2s}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);border-radius:20px 20px 0 0;
-  max-height:92dvh;display:flex;flex-direction:column;animation:up .28s cubic-bezier(.2,.9,.3,1);box-shadow:var(--shadow)}
+  max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;animation:up .28s cubic-bezier(.2,.9,.3,1);box-shadow:var(--shadow)}
 @keyframes up{from{transform:translateY(102%)}}
 @keyframes fade{from{opacity:0}}
 @media(min-width:700px){
-  .sheet{left:50%;right:auto;bottom:auto;top:50%;transform:translate(-50%,-50%);width:440px;border-radius:18px;max-height:86dvh;animation:pop .2s}
+  .sheet{left:50%;right:auto;bottom:auto;top:50%;transform:translate(-50%,-50%);width:440px;border-radius:18px;max-height:86vh;max-height:86dvh;animation:pop .2s}
   @keyframes pop{from{transform:translate(-50%,-48%) scale(.96);opacity:0}}
 }
 .grab{width:36px;height:5px;border-radius:3px;background:var(--chip-2);margin:8px auto -2px}
@@ -1881,6 +1896,15 @@ textarea.f-note{width:100%;background:var(--field);border:0;border-radius:12px;p
 .row+.row,#eSched .row,#eSched+.row{border-top:.5px solid var(--sep)}
 #eSched .row:first-child{border-top:0}
 .row .lbl{flex:1;font-size:15px}
+
+/* flex gap 需要 Chrome 84+；更老的 WebView 上 gap 会被忽略，元素会贴在一起。
+   这里只在"不支持 gap"时补 margin，支持的浏览器完全不受影响。 */
+@supports not (gap: 1px){
+  .hd>*+*{margin-left:8px}
+  .row>*+*{margin-left:10px}
+  .chips>*+*{margin-left:6px}
+  .hd{gap:0}.row{gap:0}.chips{gap:0}
+}
 .row .lbl.lk{flex:0 0 auto;white-space:nowrap}
 .row .lbl.vv{flex:1;min-width:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}
 .row input[type=date],.row input[type=time]{background:var(--chip);border:0;border-radius:8px;padding:6px 9px;font-size:15px;outline:none;font-variant-numeric:tabular-nums}
@@ -1908,13 +1932,30 @@ textarea.f-note{width:100%;background:var(--field);border:0;border-radius:12px;p
 .danger{width:100%;padding:13px;border-radius:12px;background:var(--field);color:var(--red);font-size:15px;font-weight:500;text-align:center}
 .sw{position:relative;width:50px;height:30px;flex:none}
 .sw input{position:absolute;opacity:0;width:100%;height:100%;margin:0;z-index:2}
-.sw i{position:absolute;inset:0;border-radius:30px;background:var(--chip-2);transition:background .2s}
+.sw i{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;border-radius:30px;background:var(--chip-2);transition:background .2s}
 .sw i::after{content:'';position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
 .sw input:checked+i{background:var(--green)}
 .sw input:checked+i::after{transform:translateX(20px)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + var(--sb));z-index:70;background:var(--text);color:var(--bg);
   padding:11px 16px;border-radius:22px;font-size:13.5px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);animation:fade .2s;max-width:90vw}
 .toast button{color:var(--accent);font-weight:600;font-size:13.5px}
+
+/* ---- 更新提示条 + 应用内下载进度 ---- */
+.updbar{position:fixed;left:12px;right:12px;bottom:calc(98px + var(--sb));z-index:68;
+  display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;border-radius:14px;
+  background:var(--surface);box-shadow:var(--shadow);animation:fade .25s}
+.updbar .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
+.updbar .tx{flex:1;min-width:0;font-size:13.5px;line-height:1.35;color:var(--text)}
+.updbar .tx b{font-weight:600}
+.updbar .go{border:0;background:var(--accent);color:#fff;font:inherit;font-size:13px;font-weight:600;
+  padding:7px 13px;border-radius:9px;flex:none}
+.updbar .x{border:0;background:transparent;color:var(--text-3);font-size:18px;line-height:1;padding:0 4px;flex:none}
+.dlbar{height:5px;border-radius:3px;background:var(--sep);overflow:hidden;margin:11px 2px 0}
+.dlbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .18s}
+.updalt{display:flex;gap:8px;margin-top:9px}
+.updalt button{flex:1;padding:11px;border:0;border-radius:11px;background:var(--chip);
+  color:var(--text);font:inherit;font-size:13.5px}
+.updalt button:active{opacity:.7}
 /* ====== 本地增强：进度 / DDL / 统计 ====== */
 .prog{display:flex;align-items:center;gap:8px;margin-top:9px;height:16px}
 .prog .bar{flex:0 1 150px;height:5px;border-radius:3px;background:var(--chip-2);overflow:hidden}
@@ -2028,7 +2069,9 @@ input,textarea,select{font-size:16px}
 .cinrow .w{flex:none;font-size:11px;color:var(--text-3)}
 .cinfoot{margin-top:8px;padding-top:8px;border-top:.5px solid var(--sep);font-size:11.5px;color:var(--text-3);line-height:1.6}
 .overload{margin-top:10px;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.65;
+  background:var(--surface);
   background:color-mix(in srgb,var(--red) 8%,var(--surface));
+  border:1px solid var(--sep, rgba(0,0,0,.12));
   border:1px solid color-mix(in srgb,var(--red) 22%,transparent);color:var(--text-2)}
 .overload b{color:var(--red);font-weight:700}
 .ovname{background:none;border:0;padding:0;font:inherit;font-weight:700;color:var(--red);
@@ -2073,7 +2116,7 @@ input,textarea,select{font-size:16px}
 .sres .sm.wrap{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.45}
 .sres .sk{flex:none;font-size:10.5px;color:var(--text-3)}
 .sres.done .sn{text-decoration:line-through;color:var(--text-3)}
-.langpick{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;
+.langpick{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:12px;padding:32px}
 .langpick .lpn{font:600 22px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;
   color:var(--text);letter-spacing:-.4px;margin-bottom:2px}
@@ -2086,16 +2129,24 @@ input,textarea,select{font-size:16px}
   box-shadow:0 8px 22px -18px rgba(80,70,50,.9)}
 .langpick button:active{background:var(--chip);transform:scale(.985)}
 .langpick button.on{border-color:var(--accent);color:var(--accent)}
-.bubble{position:relative;margin:0 0 0 auto;width:-moz-fit-content;width:fit-content;
+.bubble{position:relative;margin:0 0 0 auto;width:-moz-fit-content;width:fit-content;min-height:34px;box-sizing:border-box;
   max-width:min(240px,76%);background:var(--surface);
   border:1px solid var(--sep);border-radius:15px;padding:8px 12px;font-size:12px;color:var(--text-2);line-height:1.4;
   box-shadow:0 6px 16px -14px rgba(80,70,50,.9);transition:opacity .25s}
 .bubble:after{content:'';position:absolute;right:26px;bottom:-6px;width:13px;height:13px;background:var(--surface);
   border-right:1px solid var(--sep);border-bottom:1px solid var(--sep);border-bottom-right-radius:5px;transform:rotate(42deg)}
-.catwrap{position:relative}
-.stage{height:176px;margin:2px 0 10px;position:relative;display:grid;place-items:end center}
-.stage svg{display:block;max-width:100%;height:auto;image-rendering:pixelated;animation:catfloat 4.2s ease-in-out infinite}
-@keyframes catfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.catwrap{position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
+/* 深色底上不给描边改色、也不加亮光晕（亮光会把黑色描边衬得更跳）。
+   改用一层向下的暗投影，让猫像是落在背景上，轮廓靠明暗差分开。 */
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .stage svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))} }
+:root[data-theme="dark"] .stage svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+.catwrap.hop{animation:catHop .66s cubic-bezier(.34,1.56,.64,1)}
+@keyframes catHop{0%{transform:translateY(0) scaleY(1)}28%{transform:translateY(-8px) scaleY(1.05)}
+  55%{transform:translateY(0) scaleY(.93)}76%{transform:translateY(-2px) scaleY(1.01)}100%{transform:translateY(0) scaleY(1)}}
+.bubble.pop{animation:bubPop .34s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bubPop{0%{transform:scale(.9);opacity:.5}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+.stage{height:176px;min-height:176px;margin:2px 0 10px;position:relative;display:grid;place-items:end center;contain:layout}
+.stage svg{display:block;max-width:100%;height:auto;image-rendering:pixelated}
 .stage .dg{transition:opacity .3s,transform .3s}
 .stage .dg.swap{opacity:0;transform:translateY(6px) scale(.98)}
 @keyframes dgbr{0%,100%{transform:scale(1)}50%{transform:scale(1.014,1.024)}}
@@ -2132,8 +2183,9 @@ input,textarea,select{font-size:16px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .e-note .plan.heavy{color:#E2A863}}
 .sleepmark{position:absolute;left:calc(50% - 48px);top:14px;opacity:0;transform:translateY(4px);
   transition:opacity .4s,transform .4s;pointer-events:none;z-index:2}
-.sleepmark.on{opacity:1;transform:translateY(0);animation:zzfloat 2.8s ease-in-out infinite}
-@keyframes zzfloat{0%,100%{transform:translate(0,0)}50%{transform:translate(3px,-6px)}}
+.sleepmark.on{opacity:1;transform:translateY(0)}
+/* 趴着时头在左上，Zzz 挪到右上角，避开猫身 */
+.sleepmark.lie{left:auto;right:calc(50% - 104px);top:22px}
 
 .tsec{display:flex;align-items:center;gap:8px;margin:22px 22px 11px}
 .tsec h2{margin:0;font-size:14.5px;font-weight:600;letter-spacing:.2px}
@@ -2169,7 +2221,7 @@ input,textarea,select{font-size:16px}
 .tempty{text-align:center;padding:26px 20px 30px;color:var(--text-3);font-size:13px;line-height:1.7}
 .tempty svg{width:44px;height:44px;stroke:var(--text-3);fill:none;stroke-width:1.4;opacity:.7;margin-bottom:8px}
 
-#cf{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999}
+#cf{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999}
 </style>
 
 <div class="app">
@@ -2295,6 +2347,7 @@ input,textarea,select{font-size:16px}
 
   <button class="fab" id="fab" aria-label="Новое дело" data-i18n-aria="Новое дело"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
 
+  <div class="updbar" id="updBar" hidden></div>
   <nav class="tabbar">
     <button class="tab on" data-view="today">
       <svg viewBox="0 0 24 24"><path d="M4 12l8-8 8 8"/><path d="M6 10v10h12V10"/></svg><span data-i18n="Сегодня">Сегодня</span>
@@ -2314,6 +2367,45 @@ input,textarea,select{font-size:16px}
   </nav>
 </div>
 
+<script>
+/* ---- 老版本 WebView 兜底：Android 5~7 出厂 WebView 缺这几个 API，缺了会直接抛错导致白屏 ---- */
+(function(){
+  var w=window;
+  if(!String.prototype.padStart){
+    String.prototype.padStart=function(len,pad){
+      var str=String(this); pad=(pad===undefined?' ':String(pad)); len=len>>0;
+      if(str.length>=len||!pad) return str;
+      var fill='';
+      while(fill.length+str.length<len) fill+=pad;
+      return fill.slice(0,Math.max(0,len-str.length))+str;
+    };
+  }
+  if(w.NodeList&&!NodeList.prototype.forEach) NodeList.prototype.forEach=Array.prototype.forEach;
+  if(w.Element&&!Element.prototype.closest){
+    Element.prototype.closest=function(sel){
+      var el=this;
+      while(el&&el.nodeType===1){
+        var m=el.matches||el.msMatchesSelector||el.webkitMatchesSelector;
+        if(m&&m.call(el,sel)) return el;
+        el=el.parentElement||el.parentNode;
+      }
+      return null;
+    };
+  }
+  if(!Object.assign){
+    Object.assign=function(t){
+      if(t==null) throw new TypeError('Cannot convert undefined or null to object');
+      var o=Object(t);
+      for(var i=1;i<arguments.length;i++){
+        var src=arguments[i];
+        if(src==null) continue;
+        for(var k in src) if(Object.prototype.hasOwnProperty.call(src,k)) o[k]=src[k];
+      }
+      return o;
+    };
+  }
+})();
+</script>
 <script>
 (function(){
 'use strict';
@@ -2607,7 +2699,7 @@ var WD=(function(){
   return out;
 })();
 var KEEP_DAYS=14;
-var BUILD='2.0.7'; var VCODE=121;
+var BUILD='2.0.44'; var VCODE=158;
 /* 装进 APK 后以安装包里的真实版本为准 —— 免得改了 manifest 忘了改这两行 */
 (function(){
   try{
@@ -2855,13 +2947,18 @@ function shortName(n){
   for(var i=0;i<SUB_MAP.length;i++){
     if(t.indexOf(SUB_MAP[i][0])>=0) return SUB_MAP[i][1];
   }
+  /* 「思修+形策」这类合班名取前半段，否则会截成「思修+」 */
+  if(t.indexOf('+')>=0){
+    var a=t.split('+')[0].replace(/^[+＋\s]+|[+＋\s]+$/g,'');
+    if(a.length>=2) t=a;
+  }
   // 去掉「大学/高等/…」这类谁都有、认不出课的字，再去掉「概论/原理/…」
   var u=t.replace(CUT_HEAD,'');
   if(u.length>=2) t=u;
   var v=t.replace(CUT_TAIL,'');
   if(v.length>=2) t=v;
-  if(t.length<=3) return t;
-  return t.slice(0,3);
+  if(t.length<=4) return t;
+  return t.slice(0,4);
 }
 var __wgT=0;
 function pushWidgetData(){
@@ -3029,6 +3126,271 @@ var DEFAULT_PERIODS=[['08:00','08:45'],['08:55','09:40'],['10:00','10:45'],['10:
 var COURSE_COLORS=['#5B87B8','#4E9E8F','#7C6BB0','#C08A52','#A8637F','#6E8F76','#8C7B5E','#5F8AA8','#9C6B8E','#6D8B4F'];
 function toMin(hhmm){ var p=String(hhmm).split(':'); if(p.length!==2) return null; var m=(+p[0])*60+(+p[1]); return isNaN(m)?null:m; }
 function hhmm(m){ if(m==null||isNaN(m)) return ''; var h=Math.floor(m/60), mi=Math.round(m%60); return (h<10?'0':'')+h+':'+(mi<10?'0':'')+mi; }
+function cn2num(cs){
+  var m={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
+  if(cs.length===1) return m[cs]||null;
+  if(cs.charAt(0)==='十') return 10+(m[cs.charAt(1)]||0);
+  if(cs.charAt(1)==='十') return (m[cs.charAt(0)]||0)*10+(m[cs.charAt(2)]||0);
+  return null;
+}
+/* 粘贴的作息文本 -> [{n,s,e}]
+   认：第1节 08:00-08:45 / 1：08:00-08:45 / 08:00~08:45 / 第一节 8:00至8:45
+       只有开始时间+「45分钟」也认；只有节次号没有时间的，当那一节不排课 */
+function parsePeriodText(txt){
+  var out=[], errs=[], seq=0;
+  var t=String(txt||'')
+    .replace(/：/g,':').replace(/[～〜~]/g,'-').replace(/[—－–]/g,'-')
+    .replace(/[，、；;]/g,',');
+  var lines=t.split(/\n|,/).map(function(x){ return x.trim(); }).filter(Boolean);
+  lines.forEach(function(line){
+    var n=null;
+    var mN=line.match(/第\s*([0-9]{1,2}|[一二三四五六七八九十]{1,3})\s*(?:大)?\s*节/);
+    if(mN){ var v=mN[1]; n=/^[0-9]+$/.test(v)?(+v):cn2num(v); }
+    else{
+      var mS=line.match(/^\s*([0-9]{1,2})\s*[:.、)．]\s*(?=[0-9]{1,2}:[0-9]{2}\s*[-至到])/);
+      if(mS) n=+mS[1];
+    }
+    var st=null, en=null;
+    var mp=line.match(/([0-9]{1,2}):([0-9]{2})\s*[-至到]\s*([0-9]{1,2}):([0-9]{2})/);
+    if(mp){
+      var h1=+mp[1], m1=+mp[2], h2=+mp[3], m2=+mp[4];
+      if(h1<=24&&m1<60&&h2<=24&&m2<60&&(h2*60+m2)>(h1*60+m1)){ st=h1*60+m1; en=h2*60+m2; }
+    }
+    if(st===null){
+      var ts=[], re=/([0-9]{1,2}):([0-9]{2})/g, mm;
+      while((mm=re.exec(line))){ var hh=+mm[1], mi=+mm[2]; if(hh>24||mi>59) continue; ts.push(hh*60+mi); }
+      if(ts.length===1){
+        var mD=line.match(/([0-9]{2,3})\s*(?:分钟|min)/i);
+        st=ts[0]; en=ts[0]+(mD?(+mD[1]):45);
+      }
+    }
+    if(st!==null){
+      if(n===null){ seq++; n=seq; } else seq=n;
+      out.push({n:n, s:st, e:en});
+    } else if(n!==null){
+      out.push({n:n, s:null, e:null});
+    } else errs.push(line);
+  });
+  out.sort(function(a,b){ return a.n-b.n; });
+  return {list:out, errs:errs};
+}
+/* 内置作息库。data 里 s/e 是 HH:MM，只在选中时转成分钟。
+   来源以教务处/校历为准，year 是那份表的年份；多校区的取学生最多的那个校区。 */
+var SCHOOL_PERIODS = [
+  {name:'广西大学',alias:'gxu 西大 guangxi university',campus:'',year:'2022',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:30","15:15"],[6,"15:20","16:05"],[7,"16:25","17:10"],[8,"17:15","18:00"],[11,"19:40","20:25"],[12,"20:30","21:15"],[13,"21:20","22:05"]]},
+  {name:'广西师范大学',alias:'gxnu 广西师大 guangxi normal',campus:'雁山',year:'2024',p:[[1,"08:20","09:00"],[2,"09:00","09:40"],[3,"09:50","10:30"],[4,"10:40","11:20"],[5,"11:20","12:00"],[6,"14:10","14:50"],[7,"15:00","15:40"],[8,"15:50","16:30"],[9,"16:40","17:20"],[10,"19:10","19:50"],[11,"20:00","20:40"],[12,"20:50","21:30"]]},
+  {name:'桂林电子科技大学',alias:'guet 桂电 guilin electronic',campus:'花江',year:'',p:[[1,"08:25","09:10"],[2,"09:15","10:00"],[3,"10:25","11:10"],[4,"11:15","12:00"],[5,"14:30","15:15"],[6,"15:20","16:05"],[7,"16:30","17:15"],[8,"17:20","18:05"],[9,"19:30","20:15"],[10,"20:25","21:10"],[11,"21:20","22:05"]]},
+  {name:'广西民族大学',alias:'gxmzu 民大 guangxi nationalities',campus:'相思湖',year:'2025',p:[[1,"08:00","08:40"],[2,"08:50","09:30"],[3,"09:45","10:25"],[4,"10:35","11:15"],[5,"11:25","12:05"],[6,"14:30","15:10"],[7,"15:20","16:00"],[8,"16:15","16:55"],[9,"17:05","17:45"],[10,"19:30","20:10"],[11,"20:20","21:00"]]},
+  {name:'广西医科大学',alias:'gxmu 医科大 guangxi medical',campus:'',year:'2022',p:[[1,"08:00","08:40"],[2,"08:50","09:30"],[3,"09:40","10:20"],[4,"10:30","11:10"],[5,"11:20","12:00"],[6,"15:00","15:40"],[7,"15:50","16:30"],[8,"16:40","17:20"],[9,"17:30","18:10"],[10,"19:30","20:10"],[11,"20:20","21:00"],[12,"21:10","21:50"]]},
+  {name:'桂林理工大学',alias:'glut 桂工 guilin technology',campus:'雁山',year:'2023',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:25","11:10"],[4,"11:10","11:50"],[5,"14:30","15:15"],[6,"15:20","16:05"],[7,"16:15","17:00"],[8,"17:05","17:50"],[9,"18:20","19:05"],[10,"19:10","19:55"],[11,"20:05","20:50"],[12,"20:55","21:40"]]},
+  {name:'南宁师范大学',alias:'nnnu 南师大 nanning normal',campus:'武鸣',year:'2026',p:[[1,"08:30","09:10"],[2,"09:15","09:55"],[3,"10:10","10:50"],[4,"10:55","11:35"],[5,"11:40","12:20"],[6,"14:20","15:00"],[7,"15:05","15:45"],[8,"16:00","16:40"],[9,"16:45","17:25"],[10,"19:10","19:50"],[11,"20:00","20:40"],[12,"20:50","21:30"],[13,"21:40","22:20"]]},
+  {name:'广西科技大学',alias:'gxust 广科大 guangxi science',campus:'文昌',year:'2026',p:[[1,"08:00","08:40"],[2,"08:45","09:25"],[3,"09:50","10:30"],[4,"10:35","11:15"],[5,"11:20","12:00"],[6,"14:30","15:10"],[7,"15:15","15:55"],[8,"16:10","16:50"],[9,"16:55","17:35"],[10,"17:40","18:20"],[11,"19:30","20:10"],[12,"20:15","20:55"],[13,"21:00","21:40"]]},
+  {name:'玉林师范学院',alias:'ylu 玉师 yulin normal',campus:'',year:'2025',p:[[1,"08:00","08:40"],[2,"08:45","09:25"],[3,"09:45","10:25"],[4,"10:30","11:10"],[5,"11:15","11:55"],[6,"14:30","15:10"],[7,"15:15","15:55"],[8,"16:15","16:55"],[9,"17:00","17:40"],[10,"17:50","19:10"],[12,"19:40","21:00"]]},
+  {name:'山东大学',alias:'sdu 山大 shanda',campus:'济南',year:'2020',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:10","17:00"],[8,"17:10","18:00"],[9,"19:00","19:50"],[10,"20:00","20:50"],[11,"21:00","21:50"]]},
+  {name:'中国海洋大学',alias:'ouc 海大 haida',campus:'崂山',year:'2022',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"13:30","14:20"],[6,"14:30","15:20"],[7,"15:30","16:20"],[8,"16:30","17:20"],[9,"17:30","18:20"],[10,"18:30","19:20"],[11,"19:30","20:20"],[12,"20:30","21:20"]]},
+  {name:'中国石油大学（华东）',alias:'upc 石大 shida 石油大学',campus:'青岛',year:'2020',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"11:35","12:20"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:55","16:40"],[9,"16:45","17:30"],[10,"19:00","19:45"],[11,"19:50","20:35"],[12,"20:40","21:25"]]},
+  {name:'齐鲁工业大学',alias:'qlu 齐鲁工大 qigong',campus:'长清',year:'2020',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:25","11:10"],[4,"11:15","12:00"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:20","16:05"],[8,"16:05","16:50"],[9,"17:50","18:35"],[10,"18:35","19:20"],[11,"19:30","20:15"]]},
+  {name:'山东农业大学',alias:'sdau 山农大 nongda',campus:'泰安',year:'2011',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:45"],[10,"19:55","20:40"]]},
+  {name:'山东师范大学',alias:'sdnu 山师 shanshida',campus:'长清湖',year:'2018',p:[[1,"08:20","09:05"],[2,"09:10","09:55"],[3,"10:10","10:55"],[4,"11:00","11:45"],[5,"14:00","14:45"],[6,"14:50","15:35"],[7,"15:50","16:35"],[8,"16:40","17:25"],[9,"19:00","19:45"],[10,"19:50","20:35"]]},
+  {name:'曲阜师范大学',alias:'qfnu 曲师 qufu',campus:'曲阜',year:'2020',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:00","16:50"],[8,"17:00","17:50"],[9,"19:00","19:50"],[10,"20:00","20:50"],[11,"21:00","21:50"]]},
+  {name:'青岛大学',alias:'qdu 青大 qingdao',campus:'浮山',year:'2026',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"13:30","14:20"],[6,"14:30","15:20"],[7,"15:30","16:20"],[8,"16:30","17:20"],[9,"18:30","19:20"],[10,"19:30","20:20"],[11,"20:30","21:20"]]},
+  {name:'烟台大学',alias:'ytu 烟大 yantai',campus:'',year:'2011',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"]]},
+  {name:'潍坊学院',alias:'wfu 潍院 weifang',campus:'',year:'2018',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:00","16:50"],[8,"17:00","17:50"],[9,"19:00","19:50"],[10,"20:00","20:50"]]},
+  {name:'临沂大学',alias:'lyu 临大 linyi',campus:'',year:'2019',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:25","11:10"],[4,"11:15","12:00"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"15:50","16:35"],[8,"16:45","17:15"],[9,"18:20","19:10"],[10,"19:20","20:10"]]},
+  {name:'山东建筑大学',alias:'sdjzu 山建大',campus:'济南',year:'2017',p:[[1,"07:50","08:35"],[2,"08:40","09:25"],[3,"09:40","10:25"],[4,"10:30","11:15"],[5,"11:20","12:05"],[6,"13:40","14:25"],[7,"14:30","15:15"],[8,"15:30","16:15"],[9,"16:20","17:05"],[10,"18:40","19:25"],[11,"19:30","20:15"],[12,"20:20","21:05"]]},
+  {name:'山东理工大学',alias:'sdut 山理工',campus:'淄博',year:'2011',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:10","17:00"],[8,"17:10","18:00"],[9,"19:00","19:50"],[10,"20:00","20:50"]]},
+  {name:'山东交通学院',alias:'sdjtu 山交院',campus:'长清',year:'2025',p:[[1,"08:30","09:15"],[2,"09:20","10:00"],[3,"10:15","11:00"],[4,"11:05","11:45"],[5,"13:30","14:15"],[6,"14:20","15:00"],[7,"15:15","16:00"],[8,"16:05","16:45"],[9,"19:00","19:45"],[10,"19:50","20:35"]]},
+  {name:'山东工商学院',alias:'sdtbu 山商',campus:'烟台',year:'2024',p:[[1,"08:00","08:45"],[2,"08:45","09:30"],[3,"09:50","10:35"],[4,"10:35","11:20"],[5,"14:00","14:45"],[6,"14:45","15:30"],[7,"15:50","16:35"],[8,"16:35","17:20"],[9,"19:00","19:45"],[10,"19:45","20:30"]]},
+  {name:'山东中医药大学',alias:'sdutcm 山中医',campus:'长清',year:'2026',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:20","11:05"],[4,"11:10","11:55"],[5,"14:00","14:45"],[6,"14:50","15:35"],[7,"15:45","16:30"],[8,"16:35","17:20"],[9,"18:30","19:15"],[10,"19:20","20:05"]]},
+  {name:'菏泽学院',alias:'hezeu 菏院',campus:'',year:'2024',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:30","15:20"],[6,"15:30","16:20"],[7,"16:30","17:20"]]},
+  {name:'济宁学院',alias:'jnxy 济院',campus:'曲阜',year:'2018',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:25","11:10"],[4,"11:15","12:00"],[5,"14:10","14:55"],[6,"15:05","15:50"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"18:30","19:15"],[10,"19:20","20:05"],[11,"20:10","20:55"]]},
+  {name:'山东管理学院',alias:'sdmu 山管',campus:'长清',year:'2021',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:25","11:10"],[4,"11:15","12:00"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:45"],[10,"19:55","20:40"]]},
+  {name:'清华大学',alias:'thu 清华 qinghua',campus:'',year:'2025',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"13:30","14:15"],[7,"14:20","15:05"],[8,"15:20","16:05"],[9,"16:10","16:55"],[10,"17:05","17:50"],[11,"17:55","18:40"],[12,"19:20","20:05"],[13,"20:10","20:55"],[14,"21:00","21:45"]]},
+  {name:'北京大学',alias:'pku 北大 beida',campus:'',year:'2026',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"13:00","13:50"],[6,"14:00","14:50"],[7,"15:10","16:00"],[8,"16:10","17:00"],[9,"17:10","18:00"],[10,"18:40","19:30"],[11,"19:40","20:30"],[12,"20:40","21:30"]]},
+  {name:'浙江大学',alias:'zju 浙大',campus:'紫金港',year:'2023',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"10:00","10:45"],[4,"10:50","11:35"],[5,"11:40","12:25"],[6,"13:25","14:10"],[7,"14:15","15:00"],[8,"15:05","15:50"],[9,"16:15","17:00"],[10,"17:05","17:50"],[11,"18:50","19:35"],[12,"19:40","20:25"],[13,"20:30","21:15"]]},
+  {name:'复旦大学',alias:'fudan 复旦',campus:'邯郸',year:'2025',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"09:55","10:40"],[4,"10:50","11:35"],[5,"11:45","12:30"],[6,"13:30","14:15"],[7,"14:25","15:10"],[8,"15:25","16:10"],[9,"16:20","17:05"],[10,"17:15","18:00"],[11,"18:30","19:15"],[12,"19:25","20:10"],[13,"20:20","21:05"]]},
+  {name:'上海交通大学',alias:'sjtu 上交 上海交大',campus:'闵行',year:'2012',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"12:00","12:45"],[6,"12:55","13:40"],[7,"14:00","14:45"],[8,"14:55","15:40"],[9,"16:00","16:45"],[10,"16:55","17:40"],[11,"18:00","18:45"],[12,"18:55","19:40"]]},
+  {name:'南京大学',alias:'nju 南大',campus:'仙林',year:'2025',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:10","17:00"],[8,"17:10","18:00"],[9,"18:30","19:20"],[10,"19:30","20:20"],[11,"20:30","21:20"]]},
+  {name:'中山大学',alias:'sysu 中大',campus:'广州',year:'2019',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:20","15:05"],[6,"15:15","16:00"],[7,"16:20","17:05"],[8,"17:15","18:00"],[9,"19:00","19:45"],[10,"19:55","20:40"],[11,"20:50","21:35"]]},
+  {name:'四川大学',alias:'scu 川大',campus:'望江',year:'2016',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"15:50","16:35"],[8,"16:55","17:40"],[9,"17:50","18:35"],[10,"19:30","20:15"],[11,"20:25","21:10"],[12,"21:20","22:05"]]},
+  {name:'哈尔滨工业大学',alias:'hit 哈工大',campus:'哈尔滨',year:'2018',p:[[1,"08:00","08:50"],[2,"08:55","09:45"],[3,"10:00","10:50"],[4,"10:55","11:45"],[5,"13:45","14:35"],[6,"14:40","15:30"],[7,"15:45","16:35"],[8,"16:40","17:30"],[9,"18:30","19:20"],[10,"19:25","20:15"],[11,"20:30","21:20"],[12,"21:25","22:15"]]},
+  {name:'同济大学',alias:'tongji 同济',campus:'四平路',year:'2026',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"10:00","10:45"],[4,"10:50","11:35"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:30","16:15"],[8,"16:20","17:05"],[9,"18:30","19:15"],[10,"19:20","20:05"],[11,"20:10","20:55"]]},
+  {name:'东南大学',alias:'seu 东大',campus:'九龙湖',year:'2024',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:50","16:35"],[9,"16:40","17:25"],[10,"17:30","18:15"],[11,"19:00","19:45"],[12,"19:50","20:35"],[13,"20:40","21:25"]]},
+  {name:'武汉大学',alias:'whu 武大',campus:'文理学部',year:'2021',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"14:05","14:50"],[7,"14:55","15:40"],[8,"15:45","16:30"],[9,"16:40","17:25"],[10,"17:30","18:15"],[11,"18:30","19:15"],[12,"19:20","20:05"],[13,"20:10","20:55"]]},
+  {name:'华中科技大学',alias:'hust 华科 华中大',campus:'主校区',year:'2017',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:10","10:55"],[4,"11:05","11:50"],[5,"14:00","14:45"],[6,"14:50","15:35"],[7,"15:55","16:40"],[8,"16:45","17:30"],[9,"18:30","19:15"],[10,"19:20","20:05"],[11,"20:15","21:00"],[12,"21:05","21:50"]]},
+  {name:'中南大学',alias:'csu 中南',campus:'校本部',year:'2025',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:45"],[10,"19:55","20:40"]]},
+  {name:'湖南大学',alias:'hnu 湖大',campus:'南校区',year:'2018',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:30","15:15"],[6,"15:15","16:00"],[7,"16:10","16:55"],[8,"16:55","17:40"],[9,"19:00","19:45"]]},
+  {name:'重庆大学',alias:'cqu 重大',campus:'虎溪',year:'2020',p:[[1,"08:30","09:15"],[2,"09:25","10:10"],[3,"10:30","11:15"],[4,"11:25","12:10"],[5,"13:30","14:15"],[6,"14:25","15:10"],[7,"15:20","16:05"],[8,"16:25","17:10"],[9,"17:20","18:05"],[10,"19:00","19:45"],[11,"19:55","20:40"],[12,"20:50","21:35"]]},
+  {name:'电子科技大学',alias:'uestc 电子科大 成电',campus:'清水河',year:'2019',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:20","11:05"],[4,"11:10","11:55"],[5,"14:30","15:15"],[6,"15:20","16:05"],[7,"16:20","17:05"],[8,"17:10","17:55"],[9,"19:30","20:15"],[10,"20:20","21:05"],[11,"21:10","21:55"],[12,"22:00","22:45"]]},
+  {name:'华南理工大学',alias:'scut 华工 华南理工',campus:'五山',year:'2025',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:30","15:15"],[6,"15:25","16:10"],[7,"16:20","17:05"],[8,"17:15","18:00"],[9,"19:00","19:45"],[10,"19:55","20:40"],[11,"20:50","21:35"]]},
+  {name:'北京航空航天大学',alias:'buaa 北航',campus:'学院路',year:'2016',p:[[1,"08:00","08:50"],[2,"08:55","09:45"],[3,"10:00","10:50"],[4,"10:55","11:45"],[5,"14:00","14:50"],[6,"14:55","15:45"],[7,"16:00","16:50"],[8,"16:55","17:45"],[9,"18:00","18:50"],[10,"18:55","19:45"],[11,"20:00","20:50"],[12,"20:55","21:45"]]},
+  {name:'天津大学',alias:'tju 天大',campus:'北洋园',year:'2021',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:25","11:10"],[4,"11:15","12:00"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:25","16:10"],[8,"16:15","17:00"],[9,"18:30","19:15"],[10,"19:20","20:05"],[11,"20:10","20:55"],[12,"21:00","21:45"]]},
+  {name:'南开大学',alias:'nku 南开',campus:'津南',year:'2015',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"12:00","12:45"],[6,"12:55","13:40"],[7,"14:00","14:45"],[8,"14:55","15:40"],[9,"16:00","16:45"],[10,"16:55","17:40"],[11,"18:30","19:15"],[12,"19:25","20:10"],[13,"20:20","21:05"],[14,"21:15","22:00"]]},
+  {name:'吉林大学',alias:'jlu 吉大',campus:'中心校区',year:'2023',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"13:30","14:15"],[6,"14:25","15:10"],[7,"15:30","16:15"],[8,"16:25","17:10"],[9,"18:20","19:05"],[10,"19:05","19:50"],[11,"20:00","20:45"],[12,"20:45","21:30"]]},
+  {name:'大连理工大学',alias:'dlut 大工',campus:'凌水',year:'2017',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"10:05","10:50"],[4,"10:55","11:40"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:35","16:20"],[8,"16:25","17:10"],[9,"18:00","18:45"],[10,"18:55","19:40"],[11,"19:50","20:35"],[12,"20:45","21:30"]]},
+  {name:'济南大学',alias:'ujn 济大 jinan',campus:'舜耕',year:'2023',p:[[1,"08:00","08:50"],[2,"08:55","09:45"],[3,"10:15","11:05"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"14:55","15:45"],[7,"16:15","17:05"],[8,"17:10","18:00"],[9,"19:00","19:50"],[10,"19:55","20:45"],[11,"20:55","21:45"]]},
+  {name:'合肥工业大学',alias:'hfut 合工大',campus:'合肥',year:'2023',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:45"],[10,"19:55","20:40"],[11,"20:50","21:35"]]},
+  {name:'中国矿业大学',alias:'cumt 矿大 徐州',campus:'南湖',year:'2016',p:[[1,"08:00","08:50"],[2,"08:55","09:45"],[3,"10:15","11:05"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"14:55","15:45"],[7,"16:15","17:05"],[8,"17:10","18:00"],[9,"19:00","19:50"],[10,"19:55","20:45"]]},
+  {name:'东北大学',alias:'neu 东大',campus:'南湖',year:'2024',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"18:30","19:15"],[10,"19:25","20:10"],[11,"20:20","21:05"],[12,"21:15","22:00"]]},
+  {name:'云南师范大学',alias:'ynnu 云师大',campus:'呈贡',year:'2025',p:[[1,"08:30","09:15"],[2,"09:25","10:10"],[3,"10:20","11:05"],[4,"11:15","12:00"],[5,"13:40","14:25"],[6,"14:35","15:20"],[7,"15:30","16:15"],[8,"16:25","17:10"],[9,"17:20","18:05"],[10,"18:20","19:05"],[11,"19:10","19:55"],[12,"20:00","20:45"],[13,"20:50","21:35"]]},
+  {name:'武汉工程大学',alias:'wit 武工大',campus:'',year:'2019',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"11:35","12:20"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:55","16:40"],[9,"16:45","17:30"],[10,"19:00","19:45"],[11,"19:50","20:35"],[12,"20:40","21:25"]]},
+  {name:'山东科技大学',alias:'sdust 山科大',campus:'青岛',year:'2022',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:10","17:00"],[8,"17:10","18:00"],[9,"19:00","19:50"],[10,"20:00","20:50"]]},
+  {name:'山东财经大学',alias:'sdufe 山财大',campus:'燕山',year:'2026',p:[[1,"08:30","09:15"],[2,"09:15","10:00"],[3,"10:20","11:05"],[4,"11:05","11:50"],[5,"14:00","14:45"],[6,"14:45","15:30"],[7,"15:50","16:35"],[8,"16:35","17:20"],[9,"18:40","19:25"],[10,"19:25","20:10"],[11,"20:20","21:05"]]},
+  {name:'山东第二医科大学',alias:'sdsmu 潍坊医学院',campus:'潍坊',year:'',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"18:30","19:15"],[10,"19:25","20:10"],[11,"20:20","21:05"]]},
+  {name:'山东青年政治学院',alias:'sdyu 山青院',campus:'',year:'2025',p:[[1,"08:20","09:00"],[2,"09:00","09:40"],[3,"09:55","10:35"],[4,"10:35","11:15"],[5,"11:20","12:00"],[6,"13:40","14:20"],[7,"14:20","15:00"],[8,"15:15","15:55"],[9,"15:55","16:35"],[10,"18:00","18:40"],[11,"18:40","19:20"],[12,"19:25","20:05"]]},
+  {name:'山东石油化工学院',alias:'sdipct 山石',campus:'东营',year:'2024',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:10","17:00"],[8,"17:10","18:00"],[9,"19:00","19:50"],[10,"20:00","20:50"]]},
+  {name:'北京理工大学',alias:'bit 北理工',campus:'',year:'2026',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"11:35","12:20"],[6,"13:20","14:05"],[7,"14:10","14:55"],[8,"15:15","16:00"],[9,"16:05","16:50"],[10,"16:55","17:40"],[11,"18:30","19:15"],[12,"19:20","20:05"],[13,"20:10","20:55"]]},
+  {name:'北京师范大学',alias:'bnu 北师大',campus:'',year:'2019',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"13:30","14:15"],[6,"14:25","15:10"],[7,"15:30","16:15"],[8,"16:25","17:10"],[9,"18:00","18:45"],[10,"18:55","19:40"],[11,"19:50","20:35"],[12,"20:45","21:30"]]},
+  {name:'中国农业大学',alias:'cau 农大',campus:'',year:'2011',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:10","17:00"],[8,"17:10","18:00"],[9,"19:00","19:50"],[10,"20:00","20:50"],[11,"21:00","21:50"]]},
+  {name:'西北工业大学',alias:'nwpu 西工大',campus:'长安（全年不变）',year:'2015',p:[[1,"08:30","09:15"],[2,"09:25","10:10"],[3,"10:30","11:15"],[4,"11:25","12:10"],[5,"12:20","13:05"],[6,"13:05","13:50"],[7,"14:00","14:45"],[8,"14:55","15:40"],[9,"16:00","16:45"],[10,"16:55","17:40"],[11,"19:00","19:45"],[12,"19:55","20:40"],[13,"20:40","21:25"]]},
+  {name:'中国科学技术大学',alias:'ustc 中科大 科大',campus:'',year:'2025',p:[[1,"07:50","08:35"],[2,"08:40","09:25"],[3,"09:45","10:30"],[4,"10:35","11:20"],[5,"11:25","12:10"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:55","16:40"],[9,"16:45","17:30"],[10,"17:35","18:20"],[11,"19:30","20:15"],[12,"20:20","21:05"],[13,"21:10","21:55"]]},
+  {name:'厦门大学',alias:'xmu 厦大',campus:'',year:'2022',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:10","10:55"],[4,"11:05","11:50"],[5,"14:30","15:15"],[6,"15:25","16:10"],[7,"16:40","17:25"],[8,"17:35","18:20"],[9,"19:10","19:55"],[10,"20:05","20:50"],[11,"21:00","21:45"]]},
+  {name:'北京交通大学',alias:'bjtu 北交大',campus:'',year:'2022',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"12:10","13:00"],[6,"13:10","14:00"],[7,"14:10","15:00"],[8,"15:10","16:00"],[9,"16:20","17:10"],[10,"17:20","18:10"],[11,"19:00","19:50"],[12,"20:00","20:50"],[13,"21:00","21:50"]]},
+  {name:'北京科技大学',alias:'ustb 北科大 北科',campus:'',year:'2020',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:20","16:05"],[8,"16:10","16:55"],[9,"17:10","17:55"],[10,"18:00","18:45"],[11,"19:30","20:15"],[12,"20:20","21:05"]]},
+  {name:'北京邮电大学',alias:'bupt 北邮',campus:'',year:'2019',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"13:00","13:45"],[7,"13:50","14:35"],[8,"14:45","15:30"],[9,"15:40","16:25"],[10,"16:35","17:20"],[11,"17:25","18:10"],[12,"18:30","19:15"],[13,"19:20","20:05"],[14,"20:10","20:55"]]},
+  {name:'北京工业大学',alias:'bjut 北工大',campus:'平乐园',year:'2025',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:25","16:10"],[8,"16:15","17:00"],[9,"18:00","18:45"],[10,"18:50","19:35"],[11,"19:55","20:40"],[12,"20:45","21:30"]]},
+  {name:'北京化工大学',alias:'buct 北化',campus:'',year:'',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:45","11:30"],[5,"11:35","12:20"],[6,"13:00","13:45"],[7,"13:50","14:35"],[8,"14:45","15:30"],[9,"15:40","16:25"],[10,"16:30","17:15"],[11,"18:00","18:45"],[12,"18:50","19:35"],[13,"19:40","20:25"]]},
+  {name:'北京林业大学',alias:'bjfu 北林',campus:'',year:'2024',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"13:30","14:15"],[7,"14:20","15:05"],[8,"15:20","16:05"],[9,"16:10","16:55"],[10,"18:30","19:15"],[11,"19:20","20:05"],[12,"20:10","20:55"]]},
+  {name:'北京中医药大学',alias:'bucm 北中医',campus:'良乡',year:'2015',p:[[1,"08:30","09:15"],[2,"09:15","10:00"],[3,"10:30","11:15"],[4,"11:15","12:00"],[5,"13:30","14:15"],[6,"14:15","15:00"],[7,"15:30","16:15"],[8,"16:15","17:00"],[9,"18:00","18:45"],[10,"18:45","19:30"],[11,"19:40","20:25"],[12,"20:25","21:10"]]},
+  {name:'对外经济贸易大学',alias:'uibe 贸大',campus:'',year:'2008',p:[[1,"08:00","08:45"],[2,"08:45","09:30"],[3,"09:50","10:35"],[4,"10:35","11:20"],[5,"13:30","14:15"],[6,"14:15","15:00"],[7,"15:20","16:05"],[8,"16:05","16:50"],[9,"18:30","19:15"],[10,"19:15","20:00"]]},
+  {name:'中央财经大学',alias:'cufe 中财',campus:'',year:'2019',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"11:50","12:35"],[6,"12:45","13:30"],[7,"14:00","14:45"],[8,"14:55","15:40"],[9,"16:00","16:45"],[10,"16:55","17:40"],[11,"17:50","18:35"],[12,"19:20","20:05"],[13,"20:15","21:00"]]},
+  {name:'中国政法大学',alias:'cupl 法大',campus:'',year:'2025',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:45","10:30"],[4,"10:35","11:20"],[5,"11:25","12:10"],[6,"13:30","14:15"],[7,"14:20","15:05"],[8,"15:15","16:00"],[9,"16:05","16:50"],[10,"17:00","17:45"],[11,"17:50","18:35"],[12,"18:45","19:30"],[13,"19:35","20:20"],[14,"20:25","21:10"]]},
+  {name:'华北电力大学',alias:'ncepu 华电',campus:'北京',year:'',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:40"],[10,"19:55","20:40"]]},
+  {name:'北京外国语大学',alias:'bfsu 北外',campus:'',year:'2023',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"10:00","10:45"],[4,"10:50","11:35"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:30","16:15"],[8,"16:20","17:05"],[9,"17:30","18:15"],[10,"18:20","19:05"],[11,"19:30","20:15"],[12,"20:20","21:05"]]},
+  {name:'中国矿业大学（北京）',alias:'cumtb 矿大北京',campus:'学院路',year:'2025',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:20","16:05"],[8,"16:10","16:55"],[9,"17:00","17:45"],[10,"19:00","19:45"],[11,"19:50","20:35"],[12,"20:40","21:25"]]},
+  {name:'中国石油大学（北京）',alias:'cup 中石大',campus:'昌平',year:'',p:[[1,"08:00","08:50"],[2,"08:55","09:45"],[3,"10:05","10:55"],[4,"11:00","11:50"],[5,"13:30","14:20"],[6,"14:25","15:15"],[7,"15:30","16:20"],[8,"16:25","17:15"],[9,"18:30","19:20"],[10,"19:25","20:15"],[11,"20:20","21:10"]]},
+  {name:'中国地质大学（北京）',alias:'cugb 地大北京',campus:'',year:'2022',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:20","11:05"],[4,"11:15","12:00"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:10","16:55"],[8,"17:05","17:50"],[9,"19:00","19:45"],[10,"19:55","20:40"],[11,"20:50","21:35"]]},
+  {name:'华东师范大学',alias:'ecnu 华师大 华东师大',campus:'闵行',year:'2024',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"13:00","13:45"],[7,"13:50","14:35"],[8,"14:50","15:35"],[9,"15:40","16:25"],[10,"16:30","17:15"],[11,"18:00","18:45"],[12,"18:50","19:35"],[13,"19:40","20:25"],[14,"20:30","21:15"]]},
+  {name:'华东理工大学',alias:'ecust 华理 华东理工',campus:'奉贤',year:'2021',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"09:55","10:40"],[4,"10:50","11:35"],[5,"13:30","14:15"],[6,"14:25","15:10"],[7,"15:25","16:10"],[8,"16:20","17:05"],[9,"18:00","18:45"],[10,"18:50","19:35"],[11,"19:45","20:30"],[12,"20:35","21:20"]]},
+  {name:'东华大学',alias:'dhu 东华',campus:'松江',year:'2020',p:[[1,"08:15","09:00"],[2,"09:00","09:45"],[3,"10:05","10:50"],[4,"10:50","11:35"],[5,"13:00","13:45"],[6,"13:45","14:30"],[7,"14:50","15:35"],[8,"15:35","16:20"],[9,"16:20","17:05"],[10,"18:00","18:45"],[11,"18:45","19:30"],[12,"19:50","20:35"],[13,"20:35","21:20"]]},
+  {name:'上海外国语大学',alias:'sisu 上外',campus:'松江',year:'2024',p:[[1,"08:15","09:00"],[2,"09:00","09:45"],[3,"10:05","10:50"],[4,"10:50","11:35"],[5,"13:00","13:45"],[6,"13:45","14:30"],[7,"14:50","15:35"],[8,"15:35","16:20"],[9,"16:30","17:15"],[10,"17:15","18:00"],[11,"18:20","19:05"],[12,"19:05","19:50"],[13,"19:50","20:35"]]},
+  {name:'上海财经大学',alias:'sufe 上财',campus:'',year:'2011',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:05","10:50"],[4,"11:00","11:45"],[5,"11:45","12:30"],[6,"13:20","14:05"],[7,"14:15","15:00"],[8,"15:25","16:10"],[9,"16:20","17:05"],[10,"17:05","17:50"],[11,"18:00","18:45"],[12,"18:55","19:40"],[13,"19:50","20:35"],[14,"20:45","21:30"]]},
+  {name:'南京理工大学',alias:'njust 南理工',campus:'南京',year:'2025',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:40","10:25"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:50","16:35"],[9,"16:40","17:25"],[10,"17:30","18:15"],[11,"19:00","19:45"],[12,"19:50","20:35"],[13,"20:40","21:25"]]},
+  {name:'南京农业大学',alias:'njau 南农',campus:'卫岗',year:'2021',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:50","16:35"],[9,"16:40","17:25"],[10,"19:00","19:45"],[11,"19:50","20:35"],[12,"20:40","21:25"]]},
+  {name:'南京师范大学',alias:'njnu 南师大',campus:'仙林',year:'2020',p:[[1,"08:00","08:40"],[2,"08:45","09:25"],[3,"09:40","10:20"],[4,"10:35","11:15"],[5,"11:20","12:00"],[6,"13:30","14:10"],[7,"14:15","14:55"],[8,"15:10","15:50"],[9,"15:55","16:35"],[10,"18:30","19:10"],[11,"19:20","20:00"],[12,"20:10","20:50"]]},
+  {name:'苏州大学',alias:'suda 苏大',campus:'',year:'2024',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"11:35","12:20"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:55","16:40"],[9,"16:45","17:30"],[10,"18:30","19:15"],[11,"19:25","20:10"],[12,"20:20","21:05"]]},
+  {name:'中国药科大学',alias:'cpu 药大 中国药大',campus:'江宁',year:'2023',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"09:55","10:40"],[4,"10:50","11:35"],[5,"13:30","14:15"],[6,"14:25","15:10"],[7,"15:25","16:10"],[8,"16:20","17:05"],[9,"18:30","19:15"],[10,"19:25","20:10"],[11,"20:20","21:05"]]},
+  {name:'安徽大学',alias:'ahu 安大',campus:'磬苑',year:'2023',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:50","16:35"],[9,"16:40","17:25"],[10,"17:30","18:15"],[11,"19:00","19:45"],[12,"19:50","20:35"],[13,"20:40","21:25"]]},
+  {name:'福州大学',alias:'fzu 福大',campus:'旗山',year:'2025',p:[[1,"08:20","09:10"],[2,"09:10","10:00"],[3,"10:20","11:10"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"14:50","15:40"],[7,"15:50","16:40"],[8,"16:40","17:30"],[9,"19:00","19:50"],[10,"19:50","20:40"],[11,"20:40","21:35"]]},
+  {name:'南昌大学',alias:'ncu 昌大',campus:'前湖',year:'2020',p:[[1,"07:50","08:30"],[2,"08:40","09:20"],[3,"09:40","10:20"],[4,"10:30","11:10"],[5,"11:20","12:00"],[6,"13:50","14:30"],[7,"14:40","15:20"],[8,"15:40","16:20"],[9,"16:30","17:10"],[10,"17:20","18:00"],[11,"19:00","19:40"],[12,"19:50","20:30"],[13,"20:40","21:20"]]},
+  {name:'武汉理工大学',alias:'whut 武理工',campus:'马房山',year:'2025',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"11:35","12:20"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:40","16:25"],[9,"16:45","17:30"],[10,"17:35","18:20"],[11,"19:00","19:45"],[12,"19:50","20:35"],[13,"20:40","21:25"]]},
+  {name:'华中师范大学',alias:'ccnu 华师',campus:'桂子山',year:'2024',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:10","10:55"],[4,"11:05","11:50"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:10","16:55"],[8,"17:05","17:50"],[9,"18:30","19:15"],[10,"19:20","20:05"],[11,"20:15","21:00"],[12,"21:05","21:50"]]},
+  {name:'中南财经政法大学',alias:'zuel 中南大 中南财大',campus:'南湖',year:'2025',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"10:00","10:45"],[4,"10:50","11:35"],[5,"14:00","14:45"],[6,"14:50","15:35"],[7,"16:00","16:45"],[8,"16:50","17:35"],[9,"19:00","19:45"],[10,"19:50","20:35"],[11,"20:40","21:25"]]},
+  {name:'湖南师范大学',alias:'hunnu 湖师大',campus:'二里半',year:'2024',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:30","15:15"],[6,"15:25","16:10"],[7,"16:20","17:05"],[8,"17:15","18:00"],[11,"19:00","19:45"],[12,"19:55","20:40"],[13,"20:50","21:35"]]},
+  {name:'暨南大学',alias:'jnu 暨大',campus:'石牌',year:'2020',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"12:40","13:25"],[6,"13:35","14:20"],[7,"14:30","15:15"],[8,"15:25","16:10"],[9,"16:20","17:05"],[10,"17:15","18:00"],[11,"19:00","19:45"],[12,"19:55","20:40"],[13,"20:50","21:35"]]},
+  {name:'华南师范大学',alias:'scnu 华师',campus:'石牌',year:'2026',p:[[1,"08:30","09:10"],[2,"09:20","10:00"],[3,"10:20","11:00"],[4,"11:10","11:50"],[5,"14:30","15:10"],[6,"15:20","16:00"],[7,"16:10","16:50"],[8,"17:00","17:40"],[9,"19:00","19:40"],[10,"19:50","20:30"]]},
+  {name:'西南交通大学',alias:'swjtu 西南交大',campus:'犀浦',year:'2025',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:40","16:25"],[9,"16:40","17:25"],[10,"17:30","18:15"],[11,"19:30","20:15"],[12,"20:20","21:05"],[13,"21:10","21:55"]]},
+  {name:'西南财经大学',alias:'swufe 西财',campus:'柳林',year:'2017',p:[[1,"08:30","09:15"],[2,"09:25","10:10"],[3,"10:20","11:05"],[4,"11:15","12:00"],[5,"13:00","13:45"],[6,"13:55","14:40"],[7,"14:50","15:35"],[8,"15:45","16:30"],[9,"16:40","17:25"],[10,"18:30","19:15"],[11,"19:25","20:10"],[12,"20:20","21:05"]]},
+  {name:'四川农业大学',alias:'sicau 川农',campus:'雅安',year:'2014',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:45"],[10,"19:55","20:40"]]},
+  {name:'西南大学',alias:'swu 西南大 西大',campus:'北碚',year:'2019',p:[[1,"08:00","08:40"],[2,"08:50","09:30"],[3,"09:40","10:20"],[4,"10:40","11:20"],[5,"11:30","12:10"],[6,"14:30","15:10"],[7,"15:20","16:00"],[8,"16:10","16:50"],[9,"17:00","17:40"],[10,"19:00","19:40"],[11,"19:50","20:30"],[12,"20:40","21:20"]]},
+  {name:'河海大学',alias:'hhu 河海',campus:'南京',year:'2021',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:50","16:35"],[9,"16:40","17:25"],[10,"18:30","19:15"],[11,"19:20","20:05"],[12,"20:10","20:55"]]},
+  {name:'江南大学',alias:'jnu 江南',campus:'蠡湖',year:'2017',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"11:35","12:20"],[6,"13:30","14:15"],[7,"14:20","15:05"],[8,"15:25","16:10"],[9,"16:15","17:00"],[10,"18:30","19:15"],[11,"19:20","20:05"],[12,"20:10","20:55"]]},
+  {name:'南京航空航天大学',alias:'nuaa 南航',campus:'将军路',year:'2024',p:[[1,"08:00","08:50"],[2,"08:55","09:45"],[3,"10:15","11:05"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"14:55","15:45"],[7,"16:15","17:05"],[8,"17:10","18:00"],[9,"18:45","19:35"],[10,"19:40","20:30"],[11,"20:35","21:25"]]},
+  {name:'郑州大学',alias:'zzu 郑大',campus:'',year:'2023',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:45"],[10,"19:55","20:40"],[11,"20:50","21:35"]]},
+  {name:'河北工业大学',alias:'hebut 河工大',campus:'北辰',year:'2025',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:25","11:10"],[4,"11:15","12:00"],[5,"14:00","14:45"],[6,"14:50","15:35"],[7,"15:55","16:40"],[8,"16:45","17:30"],[9,"18:40","19:25"],[10,"19:30","20:15"],[11,"20:20","21:05"]]},
+  {name:'内蒙古大学',alias:'imu 内大',campus:'',year:'2026',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:30","15:20"],[6,"15:30","16:20"],[7,"16:40","17:30"],[8,"17:40","18:30"],[9,"19:00","19:50"],[10,"20:00","20:50"],[11,"21:00","21:50"]]},
+  {name:'辽宁大学',alias:'lnu 辽大',campus:'崇山',year:'2025',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"13:30","14:20"],[6,"14:30","15:20"],[7,"15:40","16:30"],[8,"16:40","17:30"],[9,"18:00","18:50"],[10,"19:00","19:50"],[11,"20:10","21:00"],[12,"21:10","22:00"]]},
+  {name:'大连海事大学',alias:'dlmu 大连海事',campus:'',year:'2010',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"10:00","10:45"],[4,"10:50","11:35"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:30","16:15"],[8,"16:20","17:05"],[9,"18:00","18:45"],[10,"18:50","19:35"]]},
+  {name:'哈尔滨工程大学',alias:'hrbeu 哈工程',campus:'',year:'2016',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"11:35","12:20"],[6,"13:30","14:15"],[7,"14:20","15:05"],[8,"15:25","16:10"],[9,"16:15","17:00"],[10,"17:05","17:50"],[11,"18:30","19:15"],[12,"19:20","20:05"],[13,"20:10","20:55"]]},
+  {name:'东北农业大学',alias:'neau 东北农大',campus:'',year:'2021',p:[[1,"08:10","08:55"],[2,"09:00","09:45"],[3,"10:05","10:50"],[4,"10:55","11:40"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:35","16:20"],[8,"16:25","17:10"],[9,"18:30","19:15"],[10,"19:20","20:05"]]},
+  {name:'东北林业大学',alias:'nefu 东北林大',campus:'',year:'2019',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:55","10:40"],[4,"10:45","11:30"],[5,"13:40","14:25"],[6,"14:30","15:15"],[7,"15:35","16:20"],[8,"16:25","17:10"],[9,"18:00","18:45"],[10,"18:50","19:35"],[11,"19:40","20:25"],[12,"20:35","21:20"]]},
+  {name:'宁夏大学',alias:'nxu 宁大',campus:'',year:'2022',p:[[1,"08:10","08:55"],[2,"09:00","09:45"],[3,"10:15","11:00"],[4,"11:05","11:50"],[5,"14:00","14:45"],[6,"14:50","15:35"],[7,"15:55","16:40"],[8,"16:45","17:30"],[9,"19:00","19:45"],[10,"19:50","20:35"]]},
+  {name:'青海大学',alias:'qhu 青海大学',campus:'',year:'2018',p:[[1,"08:30","09:15"],[2,"09:25","10:10"],[3,"10:50","11:35"],[4,"11:45","12:30"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"15:50","16:35"],[8,"16:45","17:30"],[9,"19:20","20:05"],[10,"20:15","21:00"]]},
+  {name:'海南大学',alias:'hainanu 海南大学',campus:'海甸',year:'2021',p:[[1,"07:40","08:25"],[2,"08:35","09:20"],[3,"09:45","10:30"],[4,"10:40","11:25"],[5,"14:30","15:15"],[6,"15:25","16:10"],[7,"16:35","17:20"],[8,"17:30","18:15"],[9,"19:20","20:05"],[10,"20:15","21:00"],[11,"21:10","21:55"]]},
+  {name:'石河子大学',alias:'shzu 石大',campus:'',year:'2024',p:[[1,"10:00","10:45"],[2,"10:55","11:40"],[3,"12:10","12:55"],[4,"13:05","13:50"],[5,"16:00","16:45"],[6,"16:55","17:40"],[7,"18:00","18:45"],[8,"18:55","19:40"],[9,"20:30","21:15"],[10,"21:25","22:10"]]},
+  {name:'贵州大学',alias:'gzu 贵大',campus:'',year:'2024',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:30","15:20"],[6,"15:30","16:20"],[7,"16:40","17:30"],[8,"17:40","18:30"],[9,"19:30","20:20"],[10,"20:30","21:20"],[11,"21:30","22:20"]]},
+  {name:'云南大学',alias:'ynu 云大',campus:'呈贡',year:'2026',p:[[1,"08:30","09:15"],[2,"09:25","10:10"],[3,"10:30","11:15"],[4,"11:25","12:10"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:45"],[10,"19:55","20:40"],[11,"20:50","21:35"]]},
+  {name:'华中农业大学',alias:'hzau 华农',campus:'狮子山',season:'夏季',year:'2025',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:30","15:15"],[6,"15:25","16:10"],[7,"16:30","17:15"],[8,"17:25","18:10"],[9,"19:00","19:45"],[10,"19:50","20:35"],[11,"20:40","21:25"],[12,"21:30","22:15"]]},
+  {name:'华中农业大学',alias:'hzau 华农',campus:'狮子山',season:'冬季',year:'2025',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:45"],[10,"19:50","20:35"],[11,"20:40","21:25"],[12,"21:30","22:15"]]},
+  {name:'太原理工大学',alias:'tyut 太理',campus:'',season:'夏季',year:'2025',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:30","15:20"],[6,"15:30","16:20"],[7,"16:40","17:30"],[8,"17:40","18:30"],[9,"19:30","20:20"],[10,"20:30","21:20"]]},
+  {name:'太原理工大学',alias:'tyut 太理',campus:'',season:'冬季',year:'2025',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:10","17:00"],[8,"17:10","18:00"],[9,"19:00","19:50"],[10,"20:00","20:50"]]},
+  {name:'西藏大学',alias:'utibet 藏大',campus:'',season:'夏季',year:'2022',p:[[1,"09:00","09:50"],[2,"10:00","10:50"],[3,"11:10","12:00"],[4,"12:10","13:00"],[5,"15:30","16:20"],[6,"16:30","17:20"],[7,"17:30","18:20"],[8,"19:30","20:20"],[9,"20:30","21:20"]]},
+  {name:'西藏大学',alias:'utibet 藏大',campus:'',season:'冬季',year:'2022',p:[[1,"09:30","10:20"],[2,"10:30","11:20"],[3,"11:40","12:30"],[4,"12:40","13:30"],[5,"15:30","16:20"],[6,"16:30","17:20"],[7,"17:30","18:20"],[8,"19:30","20:20"],[9,"20:30","21:20"]]},
+  {name:'山东航空学院',alias:'sdua 山航院 滨州学院',campus:'滨州',season:'夏季',year:'2026',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:30","15:15"],[6,"15:25","16:10"],[7,"16:30","17:15"],[8,"17:25","18:10"],[9,"19:30","20:15"],[10,"20:25","21:10"]]},
+  {name:'山东航空学院',alias:'sdua 山航院 滨州学院',campus:'滨州',season:'冬季',year:'2026',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:45"],[10,"19:55","20:40"]]},
+  {name:'青岛科技大学',alias:'qust 青科大',campus:'崂山',season:'夏季',year:'2025',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:10","17:00"],[8,"17:10","18:00"],[9,"19:00","19:50"],[10,"20:00","20:50"]]},
+  {name:'青岛科技大学',alias:'qust 青科大',campus:'崂山',season:'冬季',year:'2025',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"13:30","14:20"],[6,"14:30","15:20"],[7,"15:40","16:30"],[8,"16:40","17:30"],[9,"18:30","19:20"],[10,"19:30","20:20"]]},
+  {name:'枣庄学院',alias:'uzz 枣院',campus:'',season:'夏季',year:'2018',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:10","10:55"],[4,"11:05","11:50"],[5,"14:30","15:15"],[6,"15:25","16:10"],[7,"16:40","17:25"],[8,"17:35","18:20"],[9,"19:30","20:15"],[10,"20:25","21:10"]]},
+  {name:'枣庄学院',alias:'uzz 枣院',campus:'',season:'冬季',year:'2018',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:10","10:55"],[4,"11:05","11:50"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:10","16:55"],[8,"17:05","17:50"],[9,"19:00","19:45"],[10,"19:55","20:40"]]},
+  {name:'泰山学院',alias:'tsu 泰院',campus:'',season:'夏季',year:'2026',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:30","15:15"],[6,"15:25","16:10"],[7,"16:30","17:15"],[8,"17:25","18:10"],[9,"19:30","20:15"],[10,"20:25","21:10"]]},
+  {name:'泰山学院',alias:'tsu 泰院',campus:'',season:'冬季',year:'2026',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"14:00","14:45"],[6,"14:55","15:40"],[7,"16:00","16:45"],[8,"16:55","17:40"],[9,"19:00","19:45"],[10,"19:55","20:40"]]},
+  {name:'青岛理工大学',alias:'qut 青岛理工',campus:'临沂',season:'夏季',year:'2022',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:30","15:20"],[6,"15:30","16:20"],[7,"16:40","17:30"],[8,"17:40","18:30"],[9,"19:30","20:20"],[10,"20:30","21:20"]]},
+  {name:'青岛理工大学',alias:'qut 青岛理工',campus:'临沂',season:'冬季',year:'2022',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:10","17:00"],[8,"17:10","18:00"],[9,"19:20","20:10"],[10,"20:20","21:10"]]},
+  {name:'山东艺术学院',alias:'sdca 山艺',campus:'长清',season:'夏季',year:'2013',p:[[1,"08:30","09:20"],[2,"09:30","10:20"],[3,"10:30","11:20"],[4,"11:30","12:20"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:00","16:50"],[8,"17:00","17:50"],[9,"19:10","20:00"],[10,"20:10","21:00"]]},
+  {name:'山东艺术学院',alias:'sdca 山艺',campus:'长清',season:'冬季',year:'2013',p:[[1,"08:30","09:20"],[2,"09:30","10:20"],[3,"10:30","11:20"],[4,"11:30","12:20"],[5,"13:30","14:20"],[6,"14:30","15:20"],[7,"15:30","16:20"],[8,"16:30","17:20"],[9,"18:40","19:30"],[10,"19:40","20:30"]]},
+  {name:'济宁医学院',alias:'jnmc 济医',campus:'太白湖',season:'夏季',year:'2019',p:[[1,"08:00","08:40"],[2,"08:50","09:30"],[3,"09:50","10:30"],[4,"10:40","11:20"],[5,"11:30","12:10"],[6,"14:30","15:10"],[7,"15:20","16:00"],[8,"16:10","16:50"],[9,"17:00","17:40"],[10,"17:50","18:30"],[11,"19:30","20:10"],[12,"20:20","21:00"]]},
+  {name:'济宁医学院',alias:'jnmc 济医',campus:'太白湖',season:'冬季',year:'2019',p:[[1,"08:00","08:40"],[2,"08:50","09:30"],[3,"09:50","10:30"],[4,"10:40","11:20"],[5,"11:30","12:10"],[6,"14:00","14:40"],[7,"14:50","15:30"],[8,"15:40","16:20"],[9,"16:30","17:10"],[10,"17:20","18:00"],[11,"19:00","19:40"],[12,"19:50","20:30"]]},
+  {name:'山东工艺美术学院',alias:'sdada 山工艺',campus:'长清',season:'夏季',year:'2022',p:[[1,"08:30","09:15"],[2,"09:15","10:00"],[3,"10:20","11:05"],[4,"11:05","11:50"],[5,"13:30","14:15"],[6,"14:15","15:00"],[7,"15:20","16:05"],[8,"16:05","16:50"],[9,"18:00","18:45"],[10,"18:45","19:30"]]},
+  {name:'山东工艺美术学院',alias:'sdada 山工艺',campus:'长清',season:'冬季',year:'2022',p:[[1,"08:30","09:15"],[2,"09:15","10:00"],[3,"10:20","11:05"],[4,"11:05","11:50"],[5,"13:00","13:45"],[6,"13:45","14:30"],[7,"14:50","15:35"],[8,"15:35","16:20"],[9,"18:00","18:45"],[10,"18:45","19:30"]]},
+  {name:'山东女子学院',alias:'sdwu 女院',campus:'长清',season:'夏季',year:'2020',p:[[1,"08:30","09:15"],[2,"09:15","10:00"],[3,"10:20","11:05"],[4,"11:05","11:50"],[5,"14:00","14:45"],[6,"14:45","15:30"],[7,"15:50","16:35"],[8,"16:35","17:20"],[9,"18:30","19:15"],[10,"19:15","20:00"],[11,"20:20","21:05"],[12,"21:05","21:50"]]},
+  {name:'山东女子学院',alias:'sdwu 女院',campus:'长清',season:'冬季',year:'2020',p:[[1,"08:30","09:15"],[2,"09:15","10:00"],[3,"10:20","11:05"],[4,"11:05","11:50"],[5,"13:30","14:15"],[6,"14:15","15:00"],[7,"15:20","16:05"],[8,"16:05","16:50"],[9,"18:00","18:45"],[10,"18:45","19:30"],[11,"19:50","20:35"],[12,"20:35","21:20"]]},
+  {name:'西北工业大学',alias:'nwpu 西工大',campus:'友谊',season:'夏季',year:'2015',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"12:20","13:05"],[6,"13:05","13:50"],[7,"14:30","15:20"],[8,"15:30","16:20"],[9,"16:40","17:30"],[10,"17:40","18:30"],[11,"19:30","20:20"],[12,"20:30","21:20"]]},
+  {name:'西北工业大学',alias:'nwpu 西工大',campus:'友谊',season:'冬季',year:'2015',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"12:20","13:05"],[6,"13:05","13:50"],[7,"14:00","14:50"],[8,"15:00","15:50"],[9,"16:10","17:00"],[10,"17:10","18:00"],[11,"19:00","19:50"],[12,"20:00","20:50"]]},
+  {name:'西安交通大学',alias:'xjtu 西交',campus:'兴庆',season:'夏季',year:'2026',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:30","15:20"],[6,"15:30","16:20"],[7,"16:40","17:30"],[8,"17:40","18:30"],[9,"19:40","20:30"],[10,"20:40","21:30"]]},
+  {name:'西安交通大学',alias:'xjtu 西交',campus:'兴庆',season:'冬季',year:'2026',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:10","17:00"],[8,"17:10","18:00"],[9,"19:10","20:00"],[10,"20:10","21:00"]]},
+  {name:'中国传媒大学',alias:'cuc 中传',campus:'北京',year:'',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:10","11:00"],[4,"11:10","12:00"],[5,"13:30","14:20"],[6,"14:30","15:20"],[7,"15:40","16:30"],[8,"16:40","17:30"],[9,"18:00","18:50"],[10,"19:00","19:50"],[11,"20:00","20:50"],[12,"21:00","21:50"]]},
+  {name:'中央民族大学',alias:'muc 民大',campus:'北京',year:'2025',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:30","12:15"],[6,"14:00","14:45"],[7,"14:50","15:35"],[8,"15:50","16:35"],[9,"16:40","17:25"],[10,"17:30","18:15"],[11,"18:30","19:15"],[12,"19:20","20:05"],[13,"20:10","20:55"]]},
+  {name:'延边大学',alias:'ybu 延大',campus:'延吉',year:'2023',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"10:05","10:50"],[4,"10:55","11:40"],[5,"13:20","14:05"],[6,"14:10","14:55"],[7,"15:05","15:50"],[8,"15:55","16:40"]]},
+  {name:'东北师范大学',alias:'nenu 东师',campus:'长春',year:'',p:[[1,"08:00","08:45"],[2,"08:45","09:30"],[3,"10:00","10:45"],[4,"10:45","11:30"],[5,"13:30","14:15"],[6,"14:15","15:00"],[7,"15:30","16:15"],[8,"16:15","17:00"],[9,"18:00","18:45"],[10,"18:45","19:30"]]},
+  {name:'杭州电子科技大学',alias:'hdu 杭电',campus:'下沙',year:'',p:[[1,"08:05","08:50"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:50","11:35"],[5,"11:40","12:25"],[6,"13:30","14:15"],[7,"14:20","15:05"],[8,"15:15","16:00"],[9,"16:05","16:50"],[10,"18:30","19:15"],[11,"19:20","20:05"],[12,"20:10","20:55"]]},
+  {name:'深圳大学',alias:'szu 深大',campus:'粤海',year:'2020',p:[[1,"08:30","09:10"],[2,"09:15","09:55"],[3,"10:15","10:55"],[4,"11:00","11:40"],[5,"11:45","12:25"],[6,"13:30","14:10"],[7,"14:15","14:55"],[8,"15:00","15:40"],[9,"16:00","16:40"],[10,"16:45","17:25"],[11,"19:00","19:40"],[12,"19:45","20:20"],[13,"20:30","21:05"],[14,"21:10","21:45"]]},
+  {name:'深圳技术大学',alias:'sztu 深技大',campus:'坪山',year:'2025',p:[[1,"08:30","09:10"],[2,"09:15","09:55"],[3,"10:15","10:55"],[4,"11:00","11:40"],[5,"11:45","12:25"],[6,"14:00","14:40"],[7,"14:45","15:25"],[8,"15:45","16:25"],[9,"16:30","17:10"],[10,"17:15","17:55"],[11,"19:00","19:40"],[12,"19:40","20:20"],[13,"20:30","21:10"],[14,"21:10","21:50"]]},
+  {name:'南方科技大学',alias:'sustech 南科大',campus:'南山',year:'',p:[[1,"08:00","08:50"],[2,"09:00","09:50"],[3,"10:20","11:10"],[4,"11:20","12:10"],[5,"14:00","14:50"],[6,"15:00","15:50"],[7,"16:20","17:10"],[8,"17:20","18:10"],[9,"19:00","19:50"],[10,"20:00","20:50"]]},
+  {name:'上海理工大学',alias:'usst 上理',campus:'杨浦',year:'2026',p:[[1,"08:00","08:40"],[2,"08:45","09:25"],[3,"09:45","10:25"],[4,"10:30","11:10"],[5,"11:15","11:55"],[6,"13:00","13:40"],[7,"13:45","14:25"],[8,"14:45","15:25"],[9,"15:30","16:10"],[10,"16:15","16:55"],[11,"18:00","18:40"],[12,"18:45","19:25"],[13,"19:30","20:10"]]},
+  {name:'上海海事大学',alias:'shmtu 海事',campus:'临港',year:'',p:[[1,"08:20","09:05"],[2,"09:10","09:55"],[3,"10:15","11:00"],[4,"11:05","11:50"],[7,"13:10","13:55"],[8,"14:00","14:45"],[9,"15:05","15:50"],[10,"15:55","16:40"],[11,"18:00","18:45"],[12,"18:50","19:35"],[13,"19:40","20:25"]]},
+  {name:'上海电力大学',alias:'shiep 上电',campus:'临港',year:'2025',p:[[1,"08:20","09:05"],[2,"09:10","09:55"],[3,"10:10","10:55"],[4,"11:00","11:45"],[5,"11:50","12:30"],[6,"13:20","14:05"],[7,"14:10","14:55"],[8,"15:10","15:55"],[9,"16:00","16:45"],[10,"16:50","17:30"],[11,"18:15","19:00"],[12,"19:05","19:50"],[13,"19:55","20:35"]]},
+  {name:'上海应用技术大学',alias:'sit 上应大',campus:'奉贤',year:'2026',p:[[1,"08:20","09:05"],[2,"09:10","09:55"],[3,"10:15","11:00"],[4,"11:05","11:50"],[5,"13:00","13:45"],[6,"13:50","14:35"],[7,"14:55","15:40"],[8,"15:45","16:30"],[9,"18:00","18:45"],[10,"18:50","19:35"],[11,"19:40","20:25"]]},
+  {name:'上海中医药大学',alias:'shutcm 上中医',campus:'张江',year:'',p:[[1,"08:00","08:40"],[2,"08:50","09:30"],[3,"09:40","10:20"],[4,"10:30","11:10"],[5,"11:20","12:00"],[6,"13:30","14:10"],[7,"14:20","15:00"],[8,"15:10","15:50"],[9,"16:00","16:40"],[10,"18:00","18:40"],[11,"18:50","19:30"],[12,"19:40","20:20"],[13,"20:30","21:10"]]},
+  {name:'上海师范大学',alias:'shnu 上师大',campus:'徐汇',year:'',p:[[1,"08:00","08:45"],[2,"08:45","09:30"],[3,"09:45","10:30"],[4,"10:30","11:15"],[6,"13:00","13:45"],[7,"13:45","14:30"],[8,"14:45","15:30"],[9,"15:30","16:15"],[11,"18:00","18:45"],[12,"18:45","19:30"],[13,"19:40","20:25"],[14,"20:25","21:10"]]},
+  {name:'上海对外经贸大学',alias:'suibe 上贸',campus:'松江',year:'2024',p:[[1,"08:15","08:55"],[2,"09:00","09:40"],[3,"09:55","10:35"],[4,"10:40","11:20"],[5,"11:25","12:05"],[6,"13:00","13:40"],[7,"13:45","14:25"],[8,"14:40","15:20"],[9,"15:25","16:05"],[10,"16:10","16:50"],[11,"18:00","18:40"],[12,"18:45","19:25"],[13,"19:40","20:20"],[14,"20:25","21:05"]]},
+  {name:'上海工程技术大学',alias:'sues 工程大',campus:'松江',year:'2023',p:[[1,"08:15","08:55"],[2,"08:55","09:35"],[3,"09:55","10:35"],[4,"10:35","11:15"],[5,"11:20","12:00"],[6,"13:20","14:00"],[7,"14:00","14:40"],[8,"15:00","15:40"],[9,"15:40","16:20"],[10,"16:35","17:15"],[11,"17:15","17:55"],[12,"18:10","18:50"],[13,"18:50","19:30"],[14,"19:35","20:15"],[15,"20:20","21:00"]]},
+  {name:'上海立信会计金融学院',alias:'lixin 立信',campus:'上川路',year:'',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:20","11:05"],[4,"11:10","11:55"],[5,"12:55","13:40"],[6,"13:45","14:30"],[7,"14:40","15:25"],[8,"15:30","16:15"],[9,"16:45","17:30"],[10,"17:35","18:20"],[11,"18:30","19:15"],[12,"19:20","20:05"],[13,"20:10","20:55"]]},
+  {name:'上海第二工业大学',alias:'sspu 二工大',campus:'浦东',year:'2015',p:[[1,"08:00","08:45"],[2,"08:50","09:35"],[3,"09:50","10:35"],[4,"10:40","11:25"],[5,"11:25","12:10"],[6,"13:00","13:45"],[7,"13:50","14:35"],[8,"14:50","15:35"],[9,"15:40","16:25"],[10,"16:30","17:15"],[11,"18:00","18:45"],[12,"18:50","19:35"],[13,"19:40","20:25"]]},
+  {name:'上海科技大学',alias:'shtech 上科大',campus:'张江',year:'2020',p:[[1,"08:15","09:00"],[2,"09:10","09:55"],[3,"10:15","11:00"],[4,"11:10","11:55"],[5,"13:00","13:45"],[6,"13:55","14:40"],[7,"15:00","15:45"],[8,"15:55","16:40"],[9,"16:50","17:35"],[10,"18:00","18:45"],[11,"18:55","19:40"],[12,"19:50","20:35"],[13,"20:45","21:30"]]},
+  {name:'上海电机学院',alias:'sdju 电机',campus:'临港',year:'2021',p:[[1,"08:10","08:55"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:45","11:30"],[5,"12:30","13:15"],[6,"13:15","14:00"],[7,"14:20","15:05"],[8,"15:05","15:50"],[9,"15:55","16:40"],[10,"17:30","18:15"],[11,"18:20","19:05"],[12,"19:10","19:55"]]},
+  {name:'上海商学院',alias:'sbs 上商',campus:'奉浦',year:'2026',p:[[1,"08:20","09:05"],[2,"09:05","09:50"],[3,"10:00","10:45"],[4,"10:45","11:30"],[5,"12:50","13:35"],[6,"13:35","14:20"],[7,"14:30","15:15"],[8,"15:15","16:00"],[9,"16:10","16:55"],[10,"17:30","18:15"],[11,"18:15","19:00"],[12,"19:10","19:55"],[13,"19:55","20:40"]]},
+  {name:'上海政法学院',alias:'shupl 上政',campus:'佘山',year:'',p:[[1,"08:15","09:00"],[2,"09:00","09:45"],[3,"10:05","10:50"],[4,"10:50","11:35"],[5,"13:00","13:45"],[6,"13:45","14:30"],[7,"14:50","15:35"],[8,"15:35","16:20"],[9,"16:30","17:15"],[10,"18:15","19:00"],[11,"19:00","19:45"],[12,"19:55","20:40"]]},
+  {name:'上海体育大学',alias:'sus 上体',campus:'杨浦',year:'2012',p:[[1,"08:00","08:45"],[2,"08:45","09:30"],[3,"09:45","10:30"],[4,"10:30","11:15"],[5,"11:15","12:00"],[7,"13:00","13:45"],[8,"13:45","14:30"],[9,"14:45","15:30"],[10,"15:30","16:15"],[11,"16:30","17:15"],[12,"17:15","18:00"],[13,"19:00","19:45"],[14,"19:45","20:30"]]},
+  {name:'上海戏剧学院',alias:'sta 上戏',campus:'华山路',year:'2017',p:[[1,"08:00","08:45"],[2,"08:45","09:30"],[3,"09:40","10:25"],[4,"10:25","11:10"],[5,"11:50","12:35"],[6,"12:35","13:20"],[7,"13:30","14:15"],[8,"14:15","15:00"],[9,"15:10","15:55"],[10,"15:55","16:40"],[11,"17:40","18:25"],[12,"18:25","19:10"]]},
+  {name:'上海海关学院',alias:'shcc 海关',campus:'浦东',year:'2023',p:[[1,"08:30","09:15"],[2,"09:20","10:05"],[3,"10:20","11:05"],[4,"11:10","11:55"],[5,"13:30","14:15"],[6,"14:20","15:05"],[7,"15:20","16:05"],[8,"16:10","16:55"],[9,"18:00","18:45"],[10,"18:45","19:30"],[11,"19:40","20:25"],[12,"20:25","21:10"]]},
+  {name:'上海大学',alias:'shu 上大',campus:'宝山',year:'2021',p:[[1,"08:00","08:45"],[2,"08:55","09:40"],[3,"10:00","10:45"],[4,"10:55","11:40"],[5,"13:00","13:45"],[6,"13:55","14:40"],[7,"15:00","15:45"],[8,"15:55","16:40"],[9,"18:00","18:45"],[10,"18:55","19:40"],[11,"20:00","20:45"],[12,"20:55","21:40"]]}
+];
+
+function schoolHit(q){
+  q = String(q||'').trim().toLowerCase();
+  if(!q) return SCHOOL_PERIODS.slice();
+  var hit = SCHOOL_PERIODS.filter(function(x){
+    return (x.name+' '+x.alias+' '+x.campus).toLowerCase().indexOf(q) >= 0;
+  });
+  /* 简写完全对上的排前面：输入 sdu 时山东大学要在山东科技(sdust)前面 */
+  var exact = [], rest = [];
+  hit.forEach(function(x){
+    var al = (' '+x.alias+' ').toLowerCase();
+    (al.indexOf(' '+q+' ') >= 0 ? exact : rest).push(x);
+  });
+  return exact.concat(rest);
+}
+/* 把库里的 [n,'08:00','08:45'] 变成 {n,s,e}（分钟） */
+function schoolPeriods(item){
+  return item.p.map(function(a){ return {n:a[0], s:toMin(a[1]), e:toMin(a[2])}; });
+}
+/* 按参数推出一整套节次 */
+function genPeriods(cfg){
+  var out=[], st=cfg.start, i;
+  for(i=1;i<=cfg.total;i++){
+    if(cfg.amN>0 && i===cfg.amN+1 && cfg.pmStart!=null && cfg.pmStart>0) st=cfg.pmStart;
+    out.push({n:i, s:st, e:st+cfg.dur});
+    st=st+cfg.dur+cfg.gap;
+  }
+  return out;
+}
+/* 把解析结果补齐成连续 1..N，缺的留空 */
+function fillPeriods(list, minN){
+  var map={}, mx=minN||0, i, out=[];
+  list.forEach(function(p){ map[p.n]=p; if(p.n>mx) mx=p.n; });
+  for(i=1;i<=mx;i++) out.push(map[i]||{n:i,s:null,e:null});
+  return out;
+}
 function periodsOf(){
   var p=S.settings.periods;
   if(!Array.isArray(p)||!p.length){
@@ -3994,169 +4356,175 @@ function cnDate(){
   return (d.getMonth()+1)+'月'+d.getDate()+'日 · '+wd;
 }
 var PXCAT={
- sit:[
-    ".........mkkkkkkk.................................mkkkkkkk..................",
-    ".........kkkkkkkk.................................kkkkkkkk..................",
-    ".........kkkkkkkk.................................kkkkkkkk..................",
-    ".......kkwwwwwwwwkkkl.........................mkkkwwwwwwwlkk................",
-    ".......kkwwwwwwwwkkkm.........................kkkkwwwwwwwlkk................",
-    ".......kkwwwwwwwwlwwkll.....................kkkwwwwwwwwwwlkk................",
-    ".......kkwwppppwwwwwkkk...kkkkkkkkkkkkkkk..lkkkwwwwwpppwwlkk................",
-    ".......kkwpppppwwwwwmkk...kkkkkkkkkkkkkkk..lkkkwwwwwpppwwlkk................",
-    ".....kkwwwppppppwwwwwwwkkkkkkkkkkkkkkkkkkkkkwwwwwpppppppwwwkkw..............",
-    "....wkkwwwppppppppwwwwwmwwwwwwwwwwwwwwwwwwwwwwwwwppppppwwwwkkw..............",
-    "....wkkwwwpppppppwwwwwwmwwwwwwwwwwwwwwwwwwwwwwwwwppppppwwwwkkw..............",
-    "....wkkwwwppppppppwwwwwlwwwwwwwwwwwwwwwwwwwwwwwwwwppppppwwlkk...............",
-    "....mkkwwwppppppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwppppppppwwwwkk...............",
-    "....wkkwwwppppppwpwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwppppppwwwlkk...............",
-    "....mkkwwwpppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwpppppppwwlkk...............",
-    "....kkkwwwpppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwpppppwwwmkk...............",
-    "....kkkwwwpppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwpppppwwwmkk...............",
-    "....kkkwwwppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwppwwwkkk...............",
-    "....kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...............",
-    "....kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...............",
-    "....mkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkm...............",
-    "....kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkk................",
-    "...kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkm...............",
-    "...kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwlkk...............",
-    "...kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwlkk...............",
-    "...kkmwwwwwwwwwwwkkkkmwwwwwwwwwwwwwwwwwlkkkkwwwwwwwwwwwwwwlkk...............",
-    "...kklwwwwwwwwwwnnkkkkwwwwwwwwwwwwwwwwwkkkknwwwwwwwwwwwwwwlkk...............",
-    "...kklwwwwwwwwwwnwkkkkwwwwwwwwwwwwwwwwwkkkkkwwwwwwwwwwwwwwmkk...............",
-    "kkkwwwwwwwwwwwnnbwwwkkkwwwwwwwwwwwwwwwkwwkknbwnwwwwwwwwwwwwwwkkk............",
-    "kkkwwwwwwwwwwwnnbkwlkkkwwwwwwwwwwwwwwwkwwkknbbnwwwwwwwwwwwwwwkkk............",
-    "kkkwwwwwwwwwwwnbbkkkkkkwwwwwwwwwwwwwwwkkkkkkbbnwwwwwwwwwwwwwwkkk............",
-    "kkkkkwwwwwwwwwnbbkkkkkkwwwwwwwwwwwwwwwkkkkkkbbnwwwwwwwwwwwwmkkkk............",
-    "..kkkwwwwwwwwwnbbkkkkkkwwwwwwwwwwwwwwwkkkkkkbbnwwwwwwwwwwwkkk...............",
-    "..kkkwwwwwwwwwwbbbbbwbwwwwwwwpppwwwwwwwbwbbwbbbwwwwwwwwwwwlkk...............",
-    "..kkkwwwwwwwwwwbbbbbbbwwwwwwwpppwwwwwwwbbbbbbbwwwwwwwwwwwwwkk...............",
-    "..kkkwwwwwwwwwwwwbbbbbwwwwwwwwwwwwwwwwwwbbbbbwwwwwwwwwwwwwbkk...............",
-    "kkkwwwwwwwwwwwwwwwwwwwwwwwwwwppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwbkkw............",
-    "kkkwwwwwwwwwwwwwwwwwwwwwwwwwpwwpwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkw............",
-    "kkkmwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkk.............",
-    "...mkkmwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkk......lkkkkkk...",
-    "...wkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkw.....kkkkkkk...",
-    "...kkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwlkkkkm...llkkkkkkk...",
-    "......lkkkkmwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkknn....kkkwwwwwwwwkkk",
-    "......lkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkknn....kkkwwwwwwwwkkk",
-    ".........kkkkkknnnwwwwwwwwwwwwwwwwwwwwwwbwwwmwwnnkkkkwwwmm...lkkwwwwwwwwwkkk",
-    ".........llmkkknnnnnwwwwwwwwwwwwwwwwwwnwnnnnnnnnnkkkkbbw.....kwwwwwwwwwwwlkk",
-    "............kkknnnnnwwwbbbbwwwwwwwwwbbwwnnnnnnnnnkkkknnw.....kwwwwwwwwwwwlkk",
-    "............mkkbbbbbwwwnnnnnnnnnnnnwwwbbbbbbbbbnnlkkknnw....wkwwwwwwwwwwwmkk",
-    "...........mkkwnnbbbbbbbbbbbbbbbbbwwwwbbbbbbnnnkkwwwlkk....kkkwwwwwwwwwwwkkk",
-    "...........mkkwnnbbbbbbbbbbbwwbwwbbbbbbbbbbbnnnkkwwwlkk....kkkwwwwwwwwwwwkkk",
-    "...........mkkwnnnbbbbbbbbbbwwbwwbbbbbbbbbbbwwwwwwwwmkk....kkkwwwwwwwwwwwkkk",
-    "..........kkwwwwwnnnbbbbbbbbbbbbbbbbbbbbbnnwkkbwwwwwwwwkkw.kkkwwwwwwwwlkkk..",
-    "..........kkwwwwwnnnbbbbbbwwbbbbbwwbbbbbbnnnwwwwwwwwwwwkkw.kkkwwwwwwwwlkkk..",
-    ".........kkkwwwwwmnnbbbbbbwwbwwwbwwbbbbbnnnnwwwwwwwwwwwlkkwkkkwwwwwwwwkklw..",
-    ".........kkkwwwwwwwwknnbbbbwwwwwwbbbbbnnkwwwwwwwwwwwwwwwkkmwkkwwwwwwwwkkw...",
-    ".........kkkwwwwwwwwnnnbbbbwwwwwwbbbbbnnnwwwwwwwwwwwwwwwkkmwkkwwwwwwwwkkw...",
-    ".........kkkwwwwwwwwlwwwbbbbbwwwwbbbbwmmlwwwwwwwwwwwwwwwwwkkkkwwwwwwwwkkk...",
-    ".........kkmwwwwwwwwwwwknnbbbbbbbbbnnkwwwwwwwwwwwwwwwwwwwwkkkkwwwwwwwwkkk...",
-    ".........kkmwwwwwwwwwwwknkbbbbbbbbnnnkwwwwwwwwwwwwwwwwwwwwkkkkwwwwwwwwkkk...",
-    "......mkkwwwwwwwwwwwwwwwwwknnbbwnnkwwwwwwwwwwwwwwwwwwwwwwwlkkwwwwwwwwwkkk...",
-    "......kkkwwwwwwwwwwwwwwwwwknnnnnnnwwwwwwwwwwwwwwwwwwwwwwwwlkkwwwwwwwwwkkk...",
-    "......kkkwwwwwbwwwwwwwwwwwlwwnnnmkwwwwwwwwwwwwbwwwwwwwwwwwlkkwwwwwwwwwkkk...",
-    "......kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwkkm...",
-    "......kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwlkkwwwwwwwwwkkl...",
-    "......kkkwwwwwwwwwwwwwwwwwbwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwlkkwwwwwwlkk......",
-    "......kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwlkk......",
-    "......kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwmkk......",
-    "......kkkwwwwwwwwwwwwwwwwwbwwbwbwwwwwwwwwbbbwwwwwwwwwwwwwwlkkwwwwwwkkm......",
-    "......kkkwwwwwwwwwwwwwwwwwbbwwwbwwwwwwwwwbbbwwwwwwwwwwwwwwlkkwwwwwwkkm......",
-    "......kkkwwwwwwwwwwwwwwwwwwbbwwbwwwwwwwwwbbwwwwwwwwwwwwwwwlkkwwwwwwkkl......",
-    ".......kklwwwwwwwwwwwwwwwwwbblwwwwwwwwwwwbbbwwwwwwwwwwwwwwkwwwwwkkk.........",
-    ".......kklwwwwwwwwwwwwwwwwwbblwwwwwwwwwwwbbbwwwwwwwwwwwwwwkwwwwwkkk.........",
-    ".......wwkkmwwwwbwwwwwwwwwwkkbwwwwwwwwwbwwwbwwwwwwwwwwwwwwkkmkkklll.........",
-    ".........kkwwwwbbwwwwwwwwwlkkwwwwwwwwwwlkwwwwwwwwwwwwwwwkkkkkkkk............",
-    ".........kkwwwwbbwwwwwwwwwlkkwwwwwwwwwwlkwwwwwwwwwwwwwwwkkkkkkkk............",
-    ".........kkkwwwwmwwwwwwwwwmkkwwwwwwwwwwkkwwwwwwwwwwwmwbkkk..................",
-    "...........kkkkkkwwbwwwwwwkkkwwwwwwwwwwkkwwwwwwwwwwwkkkkkk..................",
-    "...........kkkkkkwwwwwwwwwkkkwwwwwwwwwwkkwwwwwwwwwwbkkkkkk..................",
-    "...............wwkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkw.......................",
-    ".................kkkkkkkkkl..kkkkkkkkkkmmkkkkkkkkkkk........................",
-    ".................kkkkkkkkk...kkkkkkkkkk....................................."
-  ],
- lie:[
-    "...............................................wkkkkkkk.............................................",
-    "...............................................wkkkkkkk.............................................",
-    "................................................kkkkkkk.............................................",
-    ".............................................kkkwwwwwwwkk...........................................",
-    ".............................................kkkwwwwwwwkk...........................................",
-    ".............................................kkkwwwwwwwkk...........................................",
-    ".........................................wkkkwwwwwwwwwwkkkk.........................................",
-    ".........................................wkkkwwwwwwwwwwkkkk.........................................",
-    "..........................................kkkwwwwppppwwwwkk.w.......................................",
-    ".......................................kkkwwwwwwwpppppwwwkkkk.......................................",
-    ".......................................kkkwwwwwwwpppppwww.kkk.......................................",
-    ".......................................kkkwwwwwwpppppppwwwkkk.......................................",
-    "................................kkkkkkkkwwwwwpwwpppppppwwwkkkk......................................",
-    "................................kkkkkkkkwwwwwwwwpppppppwwwkkkk......................................",
-    "................................kkkkkkkkwwwwwwwwpppppppwwwkkkk......................................",
-    "............................wkkkwwwwwwwwwwwwwwwwpppppppwwwwwwkk........wwww.........................",
-    "..........................kkkkkkwwwwwwwwwwwwwwwwppw.pppwwwwwwkkw.kkkkkkkkkkkkk......................",
-    "..........................kkkkkkwwwwwwwwwwwwwpwwpwwwpwwwwwwwwkk..kkkkkkkkkkkkk......................",
-    "......................w.kkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkkkkkkkkkkkk......................",
-    ".....................kkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwkkkkkk................",
-    ".....................kkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwkkkkkk................",
-    ".....................kkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwwkkk.ww.............",
-    "..................kkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwkkkk............",
-    "..................kkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwkkkk............",
-    ".................wkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwkkkk............",
-    "................kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwkkk.........",
-    ".........kkkkkkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwkkk.........",
-    ".........kkkkkkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwkkk.........",
-    "........wkkkkkkkwwwwwwwwwww.wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwwwwkk.......",
-    "...kkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwwwwkkk......",
-    "...kkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwwwwkkk......",
-    "...kkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwwwwkkk......",
-    "kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkk.....",
-    "kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkk.....",
-    "kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkk.....",
-    "kkkwwwwwwpppppppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...",
-    "kkkwwwwwwppppppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...",
-    "kkkwwwwwwpppppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...",
-    "...kkkwwwpppppp.wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkwww.wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...",
-    "...kkkwwwpppppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkwwwwkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...",
-    "...kkkwwwpppppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...",
-    "...kkk.wwwwwwpppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...",
-    "....kkkkkwwwwpppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk",
-    ".....kkkkwwwwppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk",
-    ".....kkkkwwwww.wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.pwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk",
-    ".......kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk",
-    ".......kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwpppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk",
-    ".......kkkwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk",
-    "..........kkkwwwwwwwwwwwwwwwwwwwkkkwwwwwww..wwww.pwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk",
-    "..........kkkwwwwwwwwwwwwwwwwwwwwkkwwwwwwww..wwpwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk",
-    "..........kkkwwwwwwwwwwwwwwwwwwwwkkwwwwwwww.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk",
-    "..........kkkwwwwwwwwwwwwwwwwwwwkkwwwwwwwww.wwwwwwwwwwwwwwkkkkkkkwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwkkk",
-    "..........kkkwwwwwwwwwwwwwwwwwwkkkwwwwwpww..wwwwwwwwwwwwwwkkkkkkkwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwkkk",
-    "..........kkkwwwwwwwwwwwwwkkkkkkkkwwwww...pwwwwwwwwwwwwwwwkkkkkkkwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwkkk",
-    "............kkkwwwwwwwwwwwkkkkkkwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwkkkkwwwwwwwwwwwwwwwkwwwwwwwwwwwwkkk",
-    ".............kkwwwwwwwwwwwkwwkwwwwwwwwwwwwwwwwwwwwwwkkkkkkwwwwwwwkkkkwwwwwwwwwwwwkkk.wwwwwwwwwwwwkkk",
-    "............kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkkwwwwwwwkkkkkwwwwwwwwwwwkkk.wwwwwwwwwwwwkkk",
-    ".............kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.kkkkwwwwwwwwwwwwwkkkwwwwwww.wwkkkwwwwwwwwwwkkkkk.",
-    "............wkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkkwwwwwwwwwwwwwwwwwkkkkkkkkkkkkkwwwwwwwwwwwwwkkk...",
-    ".............kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkkwwwwwwwwwwwwwwwwwkkkkkkkkkkkkkwwwwwwwwwwwwwkkk...",
-    ".............wwkkkkwwwwwwpwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...",
-    "..............kkkkkkwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...",
-    ".............kkkkkkkwwwwwwppwwwwwwwwwwwkkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk...",
-    "................kkwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkw.w...",
-    "................kkwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkw.....",
-    "................kkwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkw.....",
-    "................kkkwwwwwwwwwwwwwwwwkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwww......",
-    "................kkkkkkwwwwwwwwwwkkkkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkk.........",
-    "................kkkkkkwwwwwwwwwwkkkkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkk.........",
-    "................ww.kkkwwwwwwwwwwkkkk.kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkk............",
-    "......................kkkkkkkkkk.......kkkwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwwwwwwwkkkkkkk...............",
-    "......................kkkkkkkkkk......wkkkwwwwwwwwwwkkkwwwwwwwwwwwwwwwwwwwwwwwkkkkkkk...............",
-    "......................kkkkkkkkkk.......kkkkkkkkkkkkkkkkwwwwwwwwwwwwwwwwwwwkkkkkkkkkkk...............",
-    "..........................................kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk......................",
-    "..........................................kkkkkkkkk....kkkkkkkkkkkkkkkkkkkkkkk......................",
-    "..........................................wwwwwwwww....kkkkkkkkkkkkkkkkkkk.........................."
-  ]
+sit:[
+"......................................................................................",
+"......................................................................................",
+"......................................................................................",
+"......................................................................................",
+"......................................................................................",
+"......................................................................................",
+"......................................................................................",
+"......................................................................................",
+"......................................................................................",
+"......................................................................................",
+"...................kkkkkkk...............................kkkkkkk......................",
+"...................kkkkkkk...............................kkkkkkk......................",
+".................kmellegmmkmm.........................kkkmlleeelkk....................",
+"................kkmwwwwwwwkkk.........................kkkwwwwwwwkk....................",
+"................kkmwwwwwwwkkk........................mkkkwwwwwwwkk....................",
+"................kklwpqppwwwwwkkk...................kkkwwwwwpppwwkk....................",
+"................kkeepqppwwwwwkkk..kkkkkkkkkkkkkk...kkkwwwwwpqqwwkk....................",
+"...............kkmwppqqqpwwwwlmkkkkkkkkkkkkkkkkkkkkggewwwppqqqwwmkk...................",
+"..............kkkwwppqqqqqwwwhhhghheewwwwwwwwehhbhlwwwwwpqqqppwwwkkk..................",
+"..............kkkwwppqqqqqewwhhhhheeewwwwwwwwehhbhhwwwwwqqqqppwwwkkk..................",
+"..............kkkwwppqqqqqpwwehhhhheewwwwwwwwhhhhhhwwwepqqqpppwwwkkk..................",
+"..............kkkwwppqqqqqpwwwwweeeewwwwwwweewwwwwwwwwqqqqqqppwwwkkk..................",
+"..............kkkwwppqqqqqpwwwwwwwwewwwwwwweewwwwwwwwwqqqqqpppwwwkkk..................",
+"..............kkmwwqqqqqeewwwwwwewewwwwwwwweewwwwwwwwwppqqqqppwwwkkm..................",
+"..............kkmwwqqqqpwwwwwwwwwwwwwwwwwwweeewwwwwwwwwweqqqpqwwwkkm..................",
+"..............kkmwwqpqqpwwwwwwwwwwwwwwwwwwweeewwwwwwwwwweqqqppwwwkkm..................",
+"..............kkmewppwwwwwwwwwwwwwwwwwwwwwwwwewwwwwwwwwwwwwpppwwwkk...................",
+"..............kkghwewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwpppwwwkk...................",
+"..............kkmhewwwwwwwwwweewwwwwwwwwwwwwwwwwwwwwwwwwwwwwweweekk...................",
+"..............kkmhwwwwwwwwwwweewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwhhgkk...................",
+"..............kkghwwwwwwwwwwweewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwhhgkk...................",
+".............kkmwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwekk...................",
+".............kkmwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkm..................",
+".............kkgwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkm..................",
+".............kkwwwwwwwwwwnkkkklwwwwwwwwwwwwwwwwkkkknwwwwwwwwwwwwwkkm..................",
+".............kkwwwwwwwwwwnkkkkkwwwwwwwwwwwwwwwgkkkknwwwwwwwwwwwwwkkm..................",
+"..........mmklwwwwwwwwwbnngwkkkkwwwwwwwwwwwwwkkwkkknnkwwwwwwwwwwwggm..................",
+"..........kkkwwwwwwwwwwnnngwkkkkwwwwwwwwwwwwwkkwkkknnnwwwwwwwwwwwwwkkk................",
+"..........kkkwwwwwwwwwwnnnkkkkkkwwwwwwwwwwwwwkkkkkknnnwwwwwwwwwwwwwkkk................",
+"..........kkkmehwwwwwwwnnnkkkkkkwwwwwwwwwwwwwkkkkkknnnwwwwwwwweeeelkkk................",
+"...........mkkhhewwwwwwnnnkkkkkkwwwwwwwwwwwwwkkkkkknnnwwwwwwwweeekkk..................",
+"............kkghwwwwweewnnnnnnnmwwwwwqqqwwwwwlmnknmnnneeewwwwwwwekk...................",
+"............kkmewwweppppbnnnnnnwwwwwwqqpwwwwwwwnnnnnneppppewwwwwwkkm..................",
+"............kklewwwpppppewnnnnwwwwwwweqwwwwwwwwnnnnnweppppwwwwwwwkkm..................",
+"..........kkkweewwwpppppppwwwwwwwwpwwqpqwwqwwwwwwwwpppppppwwwweeeeekkm................",
+"..........kkkeeewwwpppppppwwwwwwwweqqewpqqwwwwwwwwwpppppppewwwweekkkkm................",
+"..........mmmleewwwpppppplwwwwwwwwwwwwwwwwwwwwwwwwwpppppppwwwwwwgkkmm.................",
+".............kkkeewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwweewkkkk......mkkkkkm.......",
+".............kkkeewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwewkkkkk.....kkkkkkk.......",
+"................kkmllwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwweegmmkkk.....kmkllmmgkk......",
+"................kkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwehhkkkkk....mkkwwwwwwwmkk.....",
+"................kkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwehhkkkkkk...kkkwwwwwwwmkk.....",
+"...................kkkkkkknnnnnnhhheeehhhhehhnnnnnnnnnkkkkkk....m..kkewwwwwwwwwkk.....",
+".....................kkkkknnnnnnhhheeehhhhhhhnnnnnnnnnkkkkkk.......kkwwwwwwwwwwkk.....",
+".....................kkknnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnkkkk.......kkwwwwwwwwwwkk.....",
+".....................kkbknnnnnnnnnnnnnnnnnnnnnnnnnnnnnkkgeekkk....kkwwwwwwwwwwekk.....",
+".....................kkbkknnnnnnnnnnnnnnbnnnnnnnnnnnnnkkleekkk....kkwwwwwwwwwwekk.....",
+".....................kkgkknnnnnnnnnnwwnewnnnnnnnnnnnnneeeewmkk....kkwwwwwwwwwwkkk.....",
+"...................kkmwewlnnnnnnnnnnnnnnnnnnnnnnnnnkkbwwwwweegkk..kkwwwwwwwwkkkm......",
+"...................kkewewwknnnnnnnwwnnnnnwwnnnnnkkkgwwwwwwweegkk..kkwwwwwwwwkkk.......",
+"...................kkeewwwknknnnnnnnnwwwnnnnnnnnkkkewwwwwwwwwwkkk.kkewwwwwwekk........",
+"..................kkkwwwwwwwwkknnnnnwwwwwnnnnnkkwwwwwwwwwwwwwwmkk.kklewwwwwmkk........",
+"..................kkkwwwwwwwwkknnnnnwwwwwnnnnkkkewwwwwwwwwwwwwmkk.kkeewwwwwmkk........",
+"..................kkkwwwwwwwwwwmnnnnnnnnnnnkkbeewwwwwwwwwwwwwwwemkkkkewwwwwwkk........",
+"..................kkkeewwwwwwwwekknnnnnnnnkkkewwwwwwwwwwwwwwwweegkkkkewwwwwwkk........",
+"..................kkmhewwwwwwwwekknnnnnnnnkkkewwwwwwwwwwwwwwwwwegkkkmewwwwwwkk........",
+"................kklwwhhhwwwwwwwwwwmkknnkkkwwwwwwwwwwwehewwwwwwwwwkkgeeeeeewwkk........",
+"................kklwwhhhwwwwwwwwwwmkknnnkkwwwwwwwwwwwehhwwwwwwwwwkkgeeeeeewwkk........",
+"................kkewwhhhwwwwwwwwewwwwbbbewwwwwwwwwwhhhwwwwwwwwwwwkkleeeeeeeekk........",
+"................kkewwhhhewwwwwwweewwwwwwwwwwwwwwwwwhhhwwwwwwwwwwwkkeeeeeehhekk........",
+"................kkewwhhhewwwwwwweeewwwwwwwwwwwwwwwwhhewwwwwwwwwwwkkeeehhhhhmkk........",
+"................kkewweehhhwwwwwwwwhhllllwwwwwwwwwhhwwwwwwwwwwwwwwkklehhhekkk..........",
+"................kkewweehhhwwwwwwwwhhhhlhwwwwwwwwwhhwwwwwwwwwwwwwwkklehheekkk..........",
+"................kkewweehhhwwwwwwwwhhhhhhwwwwwwwwwbbwwwwwwwwwwwwwwkkleehhhkkk..........",
+"................kkeeeewhhhwwwwwwwwehhhhhwwwwwwwwhbbwwwwwwwwwwwweekklhhhhhkk...........",
+"................kkeeewwhhhwwwwwwwwlhhhhhwwwwwwwwhbbwwwwwwwwwwweeekkehhhhhkk...........",
+"................kkkhhhhhhhwwwwwwwwlbbmhhwwwwwwwhbbbhhhehhweeeewegklhhhkkk.............",
+"................kkkhhhhhhhwwwwwwwwebwmhhwwwwwwwhbbbhhhehhweeeeewgkhhhhkkk.............",
+".................kkmlhhhhhewwwwwwwebgghewwwwwwwehbbhhhehheeeeeeemkhmggkkm.............",
+"..................kkgeehhhwwwwwwwwwkkwwwwwwwwwwkkwwwwwwwweehhhmkkkkkkk................",
+"..................kkmeehhhwwwwwwwwwkkwwwwwwwwwwkmwwwwwwwweehhhmkkkkkkk................",
+"..................kkkllmmmwwlwweewekkwwewweewwwkkwwewwewehhgllkkk.....................",
+"....................kkkkkkwwlwwlwwekkwwlwwewewwkkwwwwwewehhkkkkk......................",
+"....................kkkkkkgewwwwwwkkkgwewweeewlkkggglggggmmkkkkk......................",
+"..........................kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...........................",
+"..........................kkkkkkkkk..kkkkkkkkkk.kkkkkkkkkkk...........................",
+"......................................mmmmmmmm........................................"
+],
+lie:[
+"..........................................kkkkkkkk..............................................................",
+"..........................................kkkkkkkk..............................................................",
+"..........................................kkkkkkkk..............................................................",
+".......................................kkkkwwwwwwwkkk...........................................................",
+".......................................kkkkwwwwwwwkkk...........................................................",
+".......................................kkkkwwwwwwwkkk...........................................................",
+"....................................kkkkwwwwwpqwwwkkk...........................................................",
+"....................................kkkkwwwwqqqewwkkk...........................................................",
+"....................................kkkkwwwwqqqpwwkkkkk.........................................................",
+"......kkkkkkkk......................kkkwwwwwqqqqwwwwkkk.........................................................",
+"......kkkkkkkk............kkkkkkkkkkwwwwweqqqqqqewwwkkk.........................................................",
+"......kkkkkkkkkkk.........kkkkkkkkkkwwwwweqqqqqqpwwwkkk.........................................................",
+"....kkkwwwwwwwkkk.....kkkkkkkkkkkkkkwwwwwwqqqqqqpwwwkkk.........................................................",
+"....kkkwwwwwwwkkkkkk..kkkkkwwwhhhhhhhwwwwqqqqqqqqwwwkkkk........................................................",
+"....kkkwwwwwwwkkkkkkkkkkkkwwwwhhhhhhhwwwqqqqqqqqqwwwwkkk........................................................",
+"....kkwwpqqqwwwwwkkkkkkwwwwwwwhhhhwwwwwwqqqqqqqqqewwwkkk........................................................",
+"....kkwppqqqwwwwwkkkkkkwwwwwwwhhhhwwwwwwqqqqqqqqqpwwwkkk...kkk..................................................",
+"....kkwppqqqwwwwwhhhhhwwwwwwwwhhhhwwwwwwwwwqqqqqqqwwwkkk..kkkk..kkkkkkkkkkkkkkk.................................",
+"..kkkkwqqqqqqqwwwhhhhhwwwwwwwwhhhhwwwwwwwwwqqqqqqqwwwkkk..kkkk..kkkkkkkkkkkkkkk.................................",
+".kkkkwwqqqqqqqwwwhhhhwwwwwwwwwhhhwwwwwwwwwwwwwpppwwwwkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...........................",
+".kkkkwwqqqqqqqpwwhhhwwwwwwwwwwhhhwwwwwwwwwwwwwpppwwwwkkkkkknnkkkwwwwwwwwwwwwwwwkkkkkk...........................",
+".kkkkwwqqqqqqqwwwhhhwwwwwwwwwwhhhwwwwwwwwwwwwwwwwwhhhhkkkknnnkkkwwwwwwwwwwwwwwwkkkkkkkkk........................",
+".kkkkwwqqqqqqqwwwhhhwwwwwwwwewhhhwwwwwwwwwwwwwwwwwhhhhkkknnnnkkkwwwwwwwwwwwwwwwwwwwwkkkk........................",
+".kkkkwwqqqqqqwwwwhhwwwwwwwweewhhhwwwwwwwwwwwwwwwwwhhhhkkknnnnkkkkkkwwwwwwwwwwwwwwwwwekkkkkkk....................",
+".kkkkwwqqqqpwwwwwhhhwwwwwwwewwhhwwwwwwwwwwwwwwwwwwwwewwkkknnnnnnkkkwwwwwwwwwwwweeeeeeeeekkkk....................",
+".kkkkwwqqqqqwwwwwhhhwwwwwwwwwwhwwwwwwwwwwwwwwwwwwwwwewwkkknnnnnnkkkwwwwwweeeeeeeeeeeeeeekkkkk...................",
+".kkkkwwqqqqwwwwwwhhhwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkknnnnkkkkkwwwweeeeeeweeeewweeeeeekkkk..................",
+".kkkkwwqqewwwwwwwhhwwwwwwwwwwwwhhwwwwwwwwwwwwwwwwwwwwwwkkkkknkkkkkwwwwweeeeewwwwwwwwweeeeekkkk..................",
+".kkkkhheewwwwwwwwwwwwwwwwwwwwwhhhwwwwwwwwwwwwwwwwwwwwwwwwwkknkkkhhhwwwwwwwwwwwwwwwwwwwwwwwwwkkkk................",
+"..kkkhheewwwwwwwwwwwwwwwwwwwwwhhwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkhhhhhwwwwwwwwwewwwwwwwwwwwwwwwkkkk................",
+"...kkhhwewwwwwwwwwwwwwwwwwwwwwhwwwwwwwwwwwwwwwwwwwwwwwwwhhkkkkhhhhhwwwwwwwwwwwwwwwwwwwwwwwwwkkkk................",
+"...kkkkwwwwwwwwhhwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwhhhkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk..............",
+"...kkkkwwwwwwwwhhwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwweeeehhkkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkk..............",
+"...kkkkwwwwwwwwhhwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwehehhhkkkkhhwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkk.............",
+"..kkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwweheehhkkkkhhwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkk............",
+"..kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkhhwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkk............",
+"..kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkk............",
+"..kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkwwwwwwwwwwwwhhhhwwkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkk..........",
+"..kkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkpppewwwwwwwhhhhhkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkkkk..........",
+"..kkkwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkkkkkpppppwwwwwwwwwhhhkkkkehwwwwwwwwwwwhhhhhhwwwwwwwwwwwwwwwwwwkkkk..........",
+"..kkkwwwwwwwwwwwwwwwwwwwwwwwwwwkkkkkkkkwppppppwwwwwwwwhhekkkhhhwwwwwwwwwwhhhhhhhwwwwwwwwwwwwwwwwwwkkkk..........",
+"kkkwwwwwwwwwwwwwwwkkwwwwwwwwwwwwwkkkkkppppppppwwwwwwhhhkkkkhhhhwwwwwwwwwwhhhhwwwwwwwwwwwwwwwwwwwwwkkkkkk........",
+"kkkwwwwwwwwwwwwwwwkkwwwwqqwwwwwwwwwwwwppppppppwwwwwwhhhkkkhhwwwwwwwwwwwwhhhwwwwwwwwwwwwwwwwwwwwwhhhhhkkk........",
+"kkkwwwwwwwwwkkwwkkkkwwwqqqwwwwwwwwwwwwpppppppwwwwwwhheekkkhhwwwwwwwwwwhhhhhwwwwwwwwwwwwwwwwwwwwhhhhhhkkk........",
+"kkkkkhhwwwwwkkkkkkkwwwwwqqwwwwwwwwwwwwwwwwwwwwwwwhhhkkknnnhhwwwwwwwwwwhhhhwwwwwwwwwwwwwwwwwwwwwhhhhhhhkhkkk.....",
+"..kkkhhwwwwppkkkkkwwwwwwqqewwqwwwwwwwwwwwwwwwwwwwhhhkkknnnhhwwwwwwwwwwwhhhwwwwwwwwwwwwwwwwwwwwwhhhhhhhhhkkk.....",
+"..kkkkwwwwpppkkwwwwwwqwwqwqqqwwwwwwwwwwwwwwwwwwwwhhhkkknnnwwwwwwwwwwwhhhhwwwwwwwwwwwwwwwwwwwwwwhhhhhhhhhkkk.....",
+"...kkkewwppppppwwwwwwwqqwwwewwwwwwwwwwwwwwwwwwwwkkknnkkkwwwwwwwwwwwwwhhhhwwwwwwwwwwwwwwwwwwwwwwhhhhkhhhhwekkk...",
+"...kkkewwppppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwkknnnkkewwwwwwwwwwwwwhhhwwwwwwwwwwwwwwwwwwwwwwwhhhkkhhwweekkk...",
+"...kkkhwwppppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwknnnnkkwwwwwwwwwwwwwhhhwwwwwwwwwwwwwwwwwwwwwwwwhhhkkhhwwwwkkk...",
+".kkkkhhwwppppwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwnnnnnnnnkkewwwwwwwwwwwwwwhnhwwwwwwwwwwwwwwwwwwwwwwhhhhhkkhhhwwwkkkk..",
+".kkkkhhwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwnnnnnnnnnnnkkwwwwwwwwwwwwwwwnnnwwwwwwwwwwwwwwwwwwwwwhhhhhhkkhhhwwwwkkkkk",
+".kkkkkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwnnnnnnnnnnnnnnnkkwwwwwwwwwwwwhhhnnnwwwwwwwwwwwwwwwwwwwwwhhhhhhkkhhhwwwwwwkkk",
+".....kkkwwwwwwwwwwwwwwwwwwwwwwhhhhhhnnnnnnnnnnnnnkkwwwwwwwwwwwwwwhhhnnnwwwwwwwwwwwwwwwwwwwwwhhhhhhkkhhhwwwwwwkkk",
+".....kkkkkkkhhwwwwwwwwwwwhhhhhhhhnnnnnnnnnnnnnnnnkkwwwwwwwwwwwhhwhhhnnnwwwwwwwwwwwwwwwwwwwhhhhhhhkkkhhwwwwwwwkkk",
+".....kkkkkkkhhwwwwwnnnhhhhhhnnnnnnnnnnnnnnnnnnkkkwwwwwwwwwwwwwhhwhhhnnnwwwwwwwwwwwwwwwwwwwhhhhhhhkkkwwwwwwwwwkkk",
+"........kkkkkkkknnnnnnhhhnnnnnnnnnnnnnnnnnnnnnkkkwwwwwwwwwwwwwhhhhhhnnnwwwwwwwwwwwwwwwwwwwhhhhhhhkkkwwwwwwwwwkkk",
+"...........kkkkknnnnnnnnnnnnnnnnnnnnnnnnnnnnkkkkwwwwwwwwwwwwwwhhhhhhnnnhhhhhhwwwwhwwwwwwhhhhhhhhhkkkwwwwwwwhwkkk",
+"...........kkkkkknnnnnnnnnnwnnwnnnnnnnnnnnnkkkkehwwwwwwwwwwwhhhhhhhhhnnnhhhhheheehwwwwwhhhhhhhhkkkkkwwwwwwhhhkkk",
+"..........kkkkhkknnnnnnnnnnwnnwnnnnnnnnnnkkkkkewwwwwwwwwwwwwhhhhhhhhhnnnhhhhheeeehhewhehhhhhhhhkkwwwwwwwwwhhhkkk",
+".........kkkwwwkkkknnnnnnnnnnnnnnnnnnnnnnkkkhhhhwwwwwwwwwwwwhhhhhkkkhhhhhhhhkkkkkkkkkkkkkkkkkkkkkwwwwwwwhhhhhkkk",
+".......kkkkkwwwwwkkknnnnnwnnnnnnwnnnnnkkkkkkhhhhwwwwwwwwwwwwhhhhhkkkwwwwwwwwkkkkkkkkkkkkkkkkkkkkkwwwwwwwhhhhhkkk",
+".......kkkwwwwwwwkkknnnnnnnnwwnnnnnnnkkkkwwwwwwwwwwwwwwwwwhhhhhkkkkkwwwwwkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwwhhhhwkkk",
+"......kkkkwwwwwwwwwkkknnnnnwwwwnnnnnkkkkkwwwwwwwwwwwwwwwwwhhhhkkkwwwwwwwwkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwhhhkkk...",
+"......kkkwwwwwwwwwwkkknnnnnwwwwnnnnkkkwwwwwwwwwwwwwwwwwwwwhhhhkkkwwwwwwwwkkkwwwwwwwwwwwwwwwwwwwwwwwwwwwhhhkkk...",
+"......kkwwwwwwwwwwwwekkkknnnnnnnnkkkwwwwwwwwwwwwwwwwwwwwhhhhkkkwwwwwwwwkkkkwwwwwwwwwwwwwwwwwwwwwwwhhhhhhhhkkk...",
+"......kkwwwwwwwwwwwhhekkknnnnnnnnkkkwwwwwwwwwwwwwwwwwwwwhhhhkkkwwwwwwwwkkwwwwwwwwwwwwwwwwwwwwwwwwwhhhhhhkkkkk...",
+"......kkwwwhhwwhhwwhhhkkknnnnnnkkwwwwwwwwwwwwwwwwwwwwwhhhhhhkkkwwhhwwwwkkwwwwwwwwwwwwwwwwwwwwwwwwwhhhhhhkkkkk...",
+"......kkkwwhhwwhhwwhhhkkkkknnnkkkwwwwwwwwwwwwwwwwwhhhhhhhhhkkkkwwhhwwhekkwwwwwwwwwwwwhhhhhhhhhhhhhhhhhhhkkk.....",
+"......kkkkwhhwwhhwwkkkkkkkknnnkkkwwwhwwwwwwwwwwwhhhhhhhhhhkkkkkwwhhwwhhkkwwwwwwwwwwwwhhhhhhhhhhhhhhhhkkkkkk.....",
+".......kkkkkkkkkkkkkkkkkkkkkkkkkkwwhhwwhhwwwwwwhhhhhhkkkkkkkkkkwwhhwwhhkkwwwwwwwwwwwwhhhhhhhhhhhhhhhhkkkkkk.....",
+".........kkkkkkkkkkkkkkkkkkkkkkkkwwhhwwhhwwhhhhhhhhhhkkkkkkkkkkkkkkkkkkkkkkhhhhhhhhhhhhhhhhhhhkkkkkkkkkkk.......",
+".........kkkkkkkkkkkk.....kkkkkkkwwhhwwhhwwhhhhhkkkkkkkkkk....kkkkkkkkkkkkkhhhhhhhhhhhhhhhhhhhkkkkkkk...........",
+"...............................kkkkkkkkkkkkkkkkkkkkkkk.........kkkkkkkkkkkkhhhhhhhhhhhhhhhhhhhkkkkkkk...........",
+"................................kkkkkkkkkkkkkkkkkkkkk.....................kkkkkkkkkkkkkkkkkkkkk.................",
+".................................kkkkkkkkkkkkkkk..........................kkkkkkkkkkkkkkkkkkkkk................."
+]
 };
-var PXPAL={k:'#2E2A26',w:'#FFFFFF',l:'#E9E8E5',m:'#C9C6C1',p:'#F6B5BF',q:'#E58C9C',b:'#7EA6D9',n:'#4E7CB0'};
+var PXPAL={k:'#2E2A26',w:'#FFFFFF',l:'#E9E8E5',m:'#C9C6C1',e:'#F4F2EF',g:'#DDDAD5',h:'#C9DEF3',p:'#F6B5BF',q:'#E58C9C',b:'#7EA6D9',n:'#4E7CB0'};
 var PXSVG={};
 function pxBuild(rows){
   var h=rows.length,w=rows[0].length,out='',y,x,x0,ch;
@@ -4209,6 +4577,39 @@ function confetti(x,y){
   cfRAF=requestAnimationFrame(frame);
 }
 
+var __catSayUntil=0, __catLast=-1;
+/* 点猫：气泡说句话 + 轻轻跳一下 */
+function catTalk(){
+  var lines=isEN()
+    ? ['Meow.','Stretching…','You did well today.','One small thing first?','I am right here.',
+       'Sleep early if you are tired.','Pat pat.','A break is fine too.','Still early. No rush.']
+    : ['喵。','伸个懒腰…','今天也辛苦啦','要不要先做一件小事','我就在这儿待着',
+       '困了就早点歇着','摸摸头','歇一会儿也没关系','还早，不急'];
+  var k=Math.floor(Math.random()*lines.length);
+  if(lines.length>1&&k===__catLast) k=(k+1)%lines.length;
+  __catLast=k;
+  var b=document.getElementById('tdBubble');
+  if(b){
+    b.textContent=lines[k];
+    b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+    setTimeout(function(){ b.classList.remove('pop'); },400);   /* 播完就摘掉，否则切页回来会重播 */
+  }
+  __catSayUntil=Date.now()+3600;
+  var cw=document.querySelector('.catwrap');
+  if(cw){
+    cw.classList.remove('hop'); void cw.offsetWidth; cw.classList.add('hop');
+    setTimeout(function(){ cw.classList.remove('hop'); },720);   /* 同上 */
+  }
+  try{ if(nativeApp()) nativeApp().haptic&&nativeApp().haptic(); }catch(e){}
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  while(el&&el!==document){
+    if(el.classList&&el.classList.contains('catwrap')){ catTalk(); return; }
+    el=el.parentNode;
+  }
+},true);
+
 function renderToday(){
   var box=$('#tdList'); if(!box) return;
   var list=todayTasks();
@@ -4221,7 +4622,7 @@ function renderToday(){
   if(e>=100){
     if(!zz&&cw){
       zz=document.createElement('span');
-      zz.className='sleepmark on'; zz.id='tdZz';
+      zz.className='sleepmark on '+catK; zz.id='tdZz';
       zz.innerHTML='<svg viewBox="0 0 16 14" width="38" height="33" shape-rendering="crispEdges"><g fill="#7EA6D9"><g transform="translate(1,7.4)"><rect x="0" y="0" width="5" height="1.2"/><rect x="3.4" y="1.2" width="1.4" height="1.2"/><rect x="2.2" y="2.4" width="1.4" height="1.2"/><rect x="1" y="3.6" width="1.4" height="1.2"/><rect x="0" y="4.8" width="5" height="1.2"/></g><g transform="translate(6.4,0)"><rect x="0" y="0" width="7" height="1.5"/><rect x="5" y="1.5" width="1.7" height="1.5"/><rect x="3.4" y="3" width="1.7" height="1.5"/><rect x="1.8" y="4.5" width="1.7" height="1.5"/><rect x="0" y="6" width="7" height="1.5"/></g></g></svg>';
       cw.appendChild(zz);
     }
@@ -4259,7 +4660,7 @@ function renderToday(){
   else if(e>=50){ bub=UIx('bub_water'); note=UIx('note_water'); }
   else if(e>=30){ bub=UIx('bub_heavy'); note=UIx('note_heavy'); }
   else { bub=UIx('bub_out'); note=UIx('note_out'); }
-  $('#tdBubble').textContent=bub;
+  if(Date.now()>=__catSayUntil) $('#tdBubble').textContent=bub;
   $('#tdNote').textContent=note;
   var planT=planEnergy();
   var pl=$('#tdPlan');
@@ -4614,6 +5015,13 @@ function layoutBTimes(){
     sp.classList.toggle('hx',clash);
   });
 }
+function hexRgb(h){
+  h=String(h||'').replace('#','').trim();
+  if(h.length===3) h=h.charAt(0)+h.charAt(0)+h.charAt(1)+h.charAt(1)+h.charAt(2)+h.charAt(2);
+  var n=parseInt(h,16);
+  if(isNaN(n)||h.length!==6) return '91,135,184';
+  return ((n>>16)&255)+','+((n>>8)&255)+','+(n&255);
+}
 function courseBlockHTML(x,l){
   l=l||{i:0,n:1};
   var top=(x.start-dayMin())*pxMin(), h=Math.max((x.end-x.start)*pxMin(),20);
@@ -4622,7 +5030,11 @@ function courseBlockHTML(x,l){
   var jt=jieci(x.j1,x.j2);
   var sub=jt+(x.place?' · '+x.place:'');
   return '<div class="cblock'+(x.moved?' moved':'')+(l.n>=2?' narrow':'')+'" data-cid="'+x.c.id+'" data-j1="'+x.j1+'" '+
-    'style="top:'+top+'px;height:'+h+'px;left:'+left+';width:'+width+';--cc:'+x.c.color+'">'+
+    'style="top:'+top+'px;height:'+h+'px;left:'+left+';width:'+width+
+      ';--cc:'+x.c.color+
+      ';background:rgba('+hexRgb(x.c.color)+',.15)'+
+      ';box-shadow:inset 0 0 0 1px rgba('+hexRgb(x.c.color)+',.45)'+
+      ';border-left:3px solid '+x.c.color+'">'+
     '<div class="btm"><b>'+hhmm(x.start)+'</b>'+(h>=50?'<b class="e">'+hhmm(x.end)+'</b>':'')+'</div>'+
     '<div class="cbt">'+esc(x.c.name)+'</div>'+
     (h>=28?'<div class="cbm">'+esc(sub)+'</div>':'')+'</div>';
@@ -7005,12 +7417,15 @@ function openCourseImport(){
         if(!sameT){
           h+='<div class="card" style="margin-top:8px;padding:11px 14px">'+
             '<label style="display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.5">'+
-            '<input type="checkbox" id="ciTerm"'+(S.settings.termStart?'':' checked')+' style="margin-top:3px;flex:none">'+
-            '<span>'+UIx('ciTermT')+'<span style="color:var(--text-3);font-size:11.5px;display:block;margin-top:1px">'+r.termStart+'</span></span></label></div>';
+            '<input type="checkbox" id="ciTerm" checked style="margin-top:3px;flex:none">'+
+            '<span>'+UIx('ciTermT')+'<span style="color:var(--text-3);font-size:11.5px;display:block;margin-top:1px">'+
+            r.termStart+(S.settings.termStart?('（'+(isEN()?'now ':'现在是 ')+S.settings.termStart+'）'):'')+
+            '</span></span></label></div>';
         }
       }
       h+='<button class="subtle" id="ciGo" style="margin-top:14px;color:var(--accent);font-weight:600;font-size:14px">'+(isEN()?('Import '+r.list.length+' class'+(r.list.length>1?'es':'')):('确认导入这 '+r.list.length+' 条'))+'</button>';
       h+='<label class="hint" style="display:block;margin-top:10px;padding:0"><input type="checkbox" id="ciRep" style="vertical-align:-2px"> '+(isEN()?'Replace existing classes':'覆盖原有课程')+'</label>';
+      h+='<label class="hint" style="display:block;margin-top:8px;padding:0"><input type="checkbox" id="ciClrTask" style="vertical-align:-2px"> '+(isEN()?'Also remove the to-dos that duplicate these classes':'同时删掉和这些课重名的待办')+'</label>';
     }
     $('#ciPrev',sh).innerHTML=h;
     var aic=$('#ciAiCopy',sh);
@@ -7031,6 +7446,26 @@ function openCourseImport(){
       var tOK=$('#ciTerm',sh)&&$('#ciTerm',sh).checked;
       snapshot();
       if(rep2){ S.courses=[]; S.moves=[]; }
+      var clrT=$('#ciClrTask',sh)&&$('#ciClrTask',sh).checked;
+      if(clrT){
+        /* 之前手动把课抄成待办的人，导入后同一个时间段会同时出现「待办卡」和「课程卡」，
+           看起来像重复。这里按全名和简称两种写法比对，把那些待办删掉。 */
+        var nmSet={};
+        __courseParsed.list.forEach(function(c){
+          var f=String(c.name||'').replace(/\s/g,'');
+          if(f) nmSet[f]=1;
+          var sh2=shortName(c.name);
+          if(sh2) nmSet[sh2]=1;
+        });
+        var before=(S.tasks||[]).length;
+        S.tasks=(S.tasks||[]).filter(function(t){
+          var s1=String(t.title||'').replace(/\s/g,'');
+          var s2=shortName(t.title);
+          return !(nmSet[s1]||nmSet[s2]);
+        });
+        var removed=before-(S.tasks||[]).length;
+        if(removed>0) toast(T('已顺带删掉 '+removed+' 条重名待办', removed+' duplicate to-do(s) removed'), true);
+      }
       if(pOK&&__courseParsed.periods&&__courseParsed.periods.length) S.settings.periods=__courseParsed.periods.slice();
       if(tOK&&__courseParsed.termStart) S.settings.termStart=__courseParsed.termStart;
       /* 作息节数不足以覆盖课程节次时（换了学校的课表），补到够用，不然那些课不显示 */
@@ -7101,35 +7536,234 @@ function openTermStartHint(){
   });
 }
 function openPeriods(){
-  var ps=periodsOf();
-  var rows=ps.map(function(p){
-    return '<div class="row"><span class="lbl">'+jieci(p.n,p.n)+'</span>'+
-      '<input type="time" data-p="'+p.n+'" data-k="s" value="'+(p.s!=null?hhmm(p.s):'')+'" style="width:92px">'+
-      '<span class="lbl" style="opacity:.5">~</span>'+
-      '<input type="time" data-p="'+p.n+'" data-k="e" value="'+(p.e!=null?hhmm(p.e):'')+'" style="width:92px"></div>';
-  }).join('');
-  var sh=openSheet('<div class="sh-h"><button class="tb" id="pdClose">'+UIx('close')+'</button><div class="t">'+UIx('rowPeriods')+'</div><button class="tb r strong" id="pdSave">'+UIx('save')+'</button></div>'+
-    '<div class="sh-b">'+
-      '<div class="hint">'+(isEN()?'Fill in the class times your school uses — class blocks land on these slots. Leave a row empty if nothing happens then.':'按你们学校的作息填，课程块会落在这些时间段上。留空表示这一节不排课。')+'</div>'+
+  var draft = __pdDraft; __pdDraft = null;
+  var cur = draft || periodsOf();
+  var sh = openSheet('');
+
+  function hdr(title, rightId, rightTxt){
+    return '<div class="sh-h"><button class="tb" id="pdX">'+UIx('close')+'</button>'+
+      '<div class="t">'+title+'</div>'+
+      (rightId ? ('<button class="tb r strong" id="'+rightId+'">'+rightTxt+'</button>') : '<span style="width:44px"></span>')+
+      '</div>';
+  }
+  function row(label, control){
+    return '<div class="row"><span class="lbl">'+label+'</span>'+control+'</div>';
+  }
+  function num(id, val, min, max){
+    return '<input type="number" id="'+id+'" value="'+val+'" min="'+min+'" max="'+max+'" style="width:74px;text-align:center">';
+  }
+  function tmin(id, val){ return '<input type="time" id="'+id+'" value="'+val+'" style="width:112px">'; }
+
+  /* ---- 逐节表 ---- */
+  function paintTable(){
+    var rows = cur.map(function(p){
+      return '<div class="row"><span class="lbl">'+jieci(p.n,p.n)+'</span>'+
+        '<input type="time" data-p="'+p.n+'" data-k="s" value="'+(p.s!=null?hhmm(p.s):'')+'" style="width:106px">'+
+        '<span class="lbl" style="opacity:.5">~</span>'+
+        '<input type="time" data-p="'+p.n+'" data-k="e" value="'+(p.e!=null?hhmm(p.e):'')+'" style="width:106px"></div>';
+    }).join('');
+    sh.innerHTML = hdr(UIx('rowPeriods'), 'pdSave', UIx('save'))+
+      '<div class="sh-b">'+
+      '<div class="hint">'+(isEN()
+        ? 'Fill in the class times your school uses. Class blocks land on these slots; leave a row empty if nothing happens then.'
+        : '按你们学校的作息填，课程块会落在这些时间段上。留空表示这一节不排课。')+'</div>'+
+      '<button class="subtle" id="pdSchool" style="margin-top:10px">'+(isEN()?'Fill by school':'按学校自动填')+'</button>'+
+      '<div class="row" style="margin-top:8px;gap:8px">'+
+        '<button class="subtle" id="pdGen" style="flex:1">'+(isEN()?'Quick fill':'一键生成')+'</button>'+
+        '<button class="subtle" id="pdPaste" style="flex:1">'+(isEN()?'Paste times':'粘贴作息')+'</button>'+
+      '</div>'+
       '<div class="card" style="margin-top:8px">'+rows+'</div>'+
-      '<button class="subtle" id="pdReset" style="margin-top:10px">'+(isEN()?'Reset to default (Guangxi University)':'恢复默认（广西大学）')+'</button>'+
-    '</div>');
-  $('#pdClose',sh).addEventListener('click',closeSheet);
-  $('#pdSave',sh).addEventListener('click',function(){
-    var arr=[];
-    ps.forEach(function(p){
-      var si=$('input[data-p="'+p.n+'"][data-k="s"]',sh), ei=$('input[data-p="'+p.n+'"][data-k="e"]',sh);
-      arr.push({n:p.n, s:si&&si.value?toMin(si.value):null, e:ei&&ei.value?toMin(ei.value):null});
+      '<button class="subtle" id="pdReset" style="margin-top:10px">'+(isEN()
+        ? 'Reset to default (Guangxi University)' : '恢复默认（广西大学）')+'</button>'+
+      '</div>';
+    $('#pdX').addEventListener('click', closeSheet);
+    $('#pdSchool').addEventListener('click', paintSchool);
+    $('#pdGen').addEventListener('click', paintGen);
+    $('#pdPaste').addEventListener('click', paintPaste);
+    $('#pdSave').addEventListener('click', function(){
+      var arr = cur.map(function(p){
+        var si = $('input[data-p="'+p.n+'"][data-k="s"]', sh);
+        var ei = $('input[data-p="'+p.n+'"][data-k="e"]', sh);
+        return {n:p.n, s:(si&&si.value)?toMin(si.value):null, e:(ei&&ei.value)?toMin(ei.value):null};
+      });
+      S.settings.periods = arr; save(); render(); closeSheet();
+      toast(T('作息已保存','Period times saved'), true);
     });
-    S.settings.periods=arr; save(); render(); closeSheet(); toast(T('作息已保存','Period times saved'),true);
-  });
-  $('#pdReset',sh).addEventListener('click',function(){
-    S.settings.periods=null; save(); closeSheet(); openPeriods();
-  });
+    $('#pdReset').addEventListener('click', function(){
+      S.settings.periods = null; save(); render(); closeSheet(); openPeriods();
+    });
+  }
+
+  /* ---- 按学校自动填 ---- */
+  function paintSchool(){
+    sh.innerHTML = hdr(isEN()?'Fill by school':'按学校自动填', '', '')+
+      '<div class="sh-b">'+
+      '<div class="hint">'+(isEN()
+        ? 'Type part of the school name. Data comes from the schools\u2019 own timetables; campuses differ a lot, so check the campus shown on the right.'
+        : '输入学校名或简称，点一下就填进表格。数据按各校教务处/校历整理，同一学校不同校区作息差很多，留意右边标的校区。')+'</div>'+
+      '<input id="scQ" type="text" placeholder="'+(isEN()?'e.g. Shandong / HDU / sdu':'例如：山东 / 杭电 / sdu')+'" '+
+        'style="margin-top:10px;width:100%;box-sizing:border-box;padding:12px;border-radius:12px;border:1px solid var(--field);background:var(--field);color:var(--c);font:inherit;font-size:15px">'+
+      '<div id="scList" style="margin-top:8px"></div>'+
+      '</div>';
+    $('#pdX').addEventListener('click', closeSheet);
+
+    function bindWeb(){
+      var w = $('#scWeb');
+      if(!w) return;
+      w.addEventListener('click', function(){
+        var q = ($('#scQ').value||'').trim();
+        var url = 'https://www.bing.com/search?q=' + encodeURIComponent((q?q:'大学') + ' 上课时间表 第1节');
+        var b = nativeApp();
+        try{
+          if(b && b.openUrl){ b.openUrl(url); return; }
+        }catch(e){}
+        try{ window.open(url,'_blank'); }catch(e2){}
+      });
+    }
+    function paintList(){
+      var q = $('#scQ').value;
+      var hit = schoolHit(q);
+      var box = $('#scList');
+      var q0 = ($('#scQ').value||'').trim();
+      var tail = '<button class="subtle" id="scWeb" style="margin-top:10px">'+(isEN()
+          ? (q0 ? ('Search “'+q0+'” timetable') : 'Search a school timetable')
+          : (q0 ? ('去搜「'+q0+'」的作息表') : '去浏览器搜上课时间表'))+'</button>';
+      if(!hit.length){
+        box.innerHTML = '<div class="hint" style="margin-top:14px;opacity:.8">'+(isEN()
+          ? 'Not in the list yet. Search it online, then paste what you find into “Paste times”.'
+          : '列表里还没有这所学校。去网上搜一下，把搜到的作息表复制下来，用「粘贴作息」粘进去就行，识别一次就能用。')+'</div>'+tail;
+        bindWeb();
+        return;
+      }
+      box.innerHTML = hit.map(function(x,i){
+        var first = x.p[0], last = x.p[x.p.length-1];
+        var p5 = x.p.filter(function(a){ return a[0]===5; })[0];
+        return '<button class="subtle" data-si="'+SCHOOL_PERIODS.indexOf(x)+'" style="margin-top:6px;text-align:left;padding:12px 14px">'+
+          '<div style="font-size:15px;font-weight:600">'+x.name+
+            (x.campus?'<span style="font-weight:400;opacity:.6;font-size:13px"> · '+x.campus+'</span>':'')+
+            (x.season?'<span style="margin-left:6px;font-size:11px;font-weight:500;padding:1px 6px;border-radius:6px;border:1px solid var(--accent);color:var(--accent);vertical-align:middle">'+(isEN()?(x.season==='夏季'?'Summer':'Winter'):x.season)+'</span>':'')+'</div>'+
+          '<div style="font-size:12px;opacity:.62;margin-top:3px">'+
+            (isEN()?'Start '+first[1]+(p5?' · P5 '+p5[1]:'')+' · up to '+last[0]
+                   :'第 1 节 '+first[1]+(p5?' · 第 5 节 '+p5[1]:'')+' · 最晚第 '+last[0]+' 节')+
+            (x.year?' · '+x.year:'')+
+          '</div></button>';
+      }).join('');
+      box.innerHTML += tail;
+      bindWeb();
+      [].forEach.call(box.querySelectorAll('[data-si]'), function(btn){
+        btn.addEventListener('click', function(){
+          var item = SCHOOL_PERIODS[+btn.dataset.si];
+          cur = fillPeriods(schoolPeriods(item), periodsOf().length);
+          paintTable();
+          var _nm = item.name + (item.season ? '（'+item.season+'）' : '');
+          toast(T('已套用 '+_nm+' 的作息，确认无误再保存',
+                  _nm+' applied — check then save'), true);
+        });
+      });
+    }
+    $('#scQ').addEventListener('input', paintList);
+    paintList();
+  }
+
+  /* ---- 一键生成 ---- */
+  function paintGen(){
+    sh.innerHTML = hdr(isEN()?'Quick fill':'一键生成作息', 'gApply', isEN()?'Apply':'套用')+
+      '<div class="sh-b">'+
+      '<div class="hint">'+(isEN()
+        ? 'Fill a few numbers and the whole timetable is worked out. You can still adjust each period afterwards — long breaks between morning classes are common, so check 3 or 4.'
+        : '填几个数就推出一整套节次，生成后还能逐节改。上午二、三节之间常有大课间，生成后看一眼那几节对不上就手动改。')+'</div>'+
+      '<div class="card" style="margin-top:8px">'+
+        row(isEN()?'First period':'第 1 节开始', tmin('gStart','08:00'))+
+        row(isEN()?'Class length':'每节课', num('gDur',45,20,120)+(isEN()?' min':' 分钟'))+
+        row(isEN()?'Break':'课间', num('gGap',10,0,60)+(isEN()?' min':' 分钟'))+
+        row(isEN()?'Morning periods':'上午几节', num('gAm',4,0,8))+
+        row(isEN()?'Afternoon starts':'下午第 1 节', tmin('gPm','14:30'))+
+        row(isEN()?'Total periods':'共几节', num('gTot',13,1,20))+
+      '</div>'+
+      '<div class="hint" style="margin-top:10px;opacity:.7">'+(isEN()
+        ? 'Afternoon start only applies after the morning block above.'
+        : '「下午第 1 节」只对上半天最后一节之后生效。')+'</div>'+
+      '</div>';
+    $('#pdX').addEventListener('click', closeSheet);
+    $('#gApply').addEventListener('click', function(){
+      var st = toMin($('#gStart').value);
+      if(st===null){ toast(isEN()?'Check the start time':'第 1 节开始时间不对'); return; }
+      var cfg = {
+        start: st,
+        dur: Math.max(20, Math.min(120, +$('#gDur').value || 45)),
+        gap: Math.max(0, Math.min(60, +$('#gGap').value || 0)),
+        amN: Math.max(0, Math.min(8, +$('#gAm').value || 0)),
+        pmStart: toMin($('#gPm').value),
+        total: Math.max(1, Math.min(20, +$('#gTot').value || 13))
+      };
+      if(cfg.amN >= cfg.total) cfg.amN = 0;
+      cur = genPeriods(cfg);
+      paintTable();
+    });
+  }
+
+  /* ---- 粘贴作息 ---- */
+  function paintPaste(){
+    var ph = isEN()
+      ? 'Period 1 08:00-08:45\nPeriod 2 08:55-09:40\n...'
+      : '第1节 08:00-08:45\n第2节 08:55-09:40\n第3节 10:00-10:45';
+    sh.innerHTML = hdr(isEN()?'Paste times':'粘贴作息', 'pApply', isEN()?'Parse':'识别')+
+      '<div class="sh-b">'+
+      '<div class="hint">'+(isEN()
+        ? 'One period per line, copied from anywhere — the school notice, a photo you typed out, your friend\'s message. Numbers and "第N节" are both fine; lines without a period number are numbered in order.'
+        : '一行一节，从哪儿复制都行——学校通知、手抄的、同学发的。带「第3节」或纯时间都能认；没有节次号的就按顺序编号。')+'</div>'+
+      '<textarea id="pTx" placeholder="'+ph.replace(/"/g,'&quot;')+'" style="margin-top:10px;width:100%;height:150px;box-sizing:border-box;padding:12px;border-radius:12px;border:1px solid var(--field);background:var(--field);color:var(--c);font:inherit;font-size:14px;line-height:1.7;resize:none"></textarea>'+
+      '<div class="hint" style="margin-top:8px;opacity:.7">'+(isEN()
+        ? 'Also fine: "1:08:00-08:45", "08:00~08:45", or one line separated by commas.'
+        : '也认：「1：08:00-08:45」「08:00~08:45」，或者整行用逗号隔开。')+'</div>'+
+      '<button class="subtle" id="pAi" style="margin-top:10px">'+(isEN()
+        ? 'Let an AI tidy it up (copy the prompt)'
+        : '不知道怎么写？让 AI 帮我整理')+'</button>'+
+      '<div class="hint" style="margin-top:8px;opacity:.7">'+(isEN()
+        ? 'Any chat AI works. Tell it what you remember \u2014 "period 1 starts at 8, 45 minutes each, 10 minute break, 4 in the morning, afternoon at 2:30" \u2014 it gives you the lines back, paste them here.'
+        : '豆包、DeepSeek、Kimi 都行。你只要说得出「第一节几点、一节课多久、课间多久、上午几节、下午几点」，剩下的交给它整理，再把结果粘回这里。')+'</div>'+
+      '</div>';
+    $('#pdX').addEventListener('click', closeSheet);
+    $('#pAi').addEventListener('click', function(){
+      var hint = isEN()
+        ? 'Turn the class times I describe below into this exact format, one period per line, output only the times and nothing else:\n\nPeriod 1 08:00-08:45\nPeriod 2 08:55-09:40\n\nHere are my times:\n(fill in what you know, e.g. "period 1 starts at 8, each class is 45 minutes, 10 minute break, 4 periods in the morning, afternoon starts at 2:30")'
+        : '请把我下面说的上课时间整理成这个格式，一行一节，只输出时间，不要别的说明：\n\n第1节 08:00-08:45\n第2节 08:55-09:40\n\n我的作息是：\n（把你知道的写在这里，比如：第一节8点开始，一节课45分钟，课间10分钟，上午4节，下午2点半开始，晚上7点开始）';
+      copyText(hint, T('提示语已复制，发给 AI 就行','Prompt copied'), T('复制失败','Copy failed'));
+    });
+    $('#pApply').addEventListener('click', function(){
+      var r = parsePeriodText($('#pTx').value);
+      if(!r.list.length){ toast(isEN()?'Could not find any times':'没认出时间，看看是不是「第1节 08:00-08:45」这种写法'); return; }
+      cur = fillPeriods(r.list, periodsOf().length);   /* 至少补齐到原来的节数，免得后面几节消失 */
+      paintTable();
+      if(r.errs.length) toast(T('有 '+r.errs.length+' 行没认出来，已跳过', r.errs.length+' line(s) skipped'));
+      else toast(T('识别到 '+r.list.length+' 节', r.list.length+' period(s) found'), true);
+    });
+  }
+
+  paintTable();
 }
+var __pdDraft = null;
 
 /* ---------- 常见疑问 ---------- */
 var HELP=[
+['装不上 / 显示不对',[
+['我的手机能装吗？',
+ 'Android 5.0 以上的手机都能装，2016 年以后买的手机基本都没问题。\n第一次打开会让你选语言，选中文就行，之后在设置里也能改。\n如果打开是一片空白、或者底部按钮跑到屏幕中间、或者课程卡片没有底色，多半不是手机坏了，是系统里的「WebView」组件太老——见下一条。'],
+['界面乱了 / 按钮跑到屏幕中间 / 卡片透明',
+ '这是手机自带的 WebView 版本太老，不是 App 的问题。\n解决办法：去应用商店搜「Android System WebView」，更新一下，然后重新打开 App。\n华为、荣耀、OPPO、vivo 一般会自动更新它，小米也会；有些备用机常年不更新，更新完就和正常手机一样了。\n想确认自己是什么版本：设置 → 拉到最底部，那里写着「WebView xxx」，后面会标「全部正常 / 基本正常 / 部分样式降级」。'],
+['桌面小组件怎么加？为什么不更新',
+ '长按桌面空白处 → 小组件 → 找到 Schedule，有 4×4、4×5、4×6 三个尺寸，挑一个拖出来，拉不动也没关系，尺寸是定好的。\n小组件过了零点会自己翻到新的一天。如果发现它停在昨天，打开一次 App 就会重新画一遍。\n有些手机管后台很严（华为、荣耀、OPPO 尤其），建议去「设置 → 应用 → Schedule → 电池」，把后台活动放开，小组件会更准时。'],
+['提醒不响 / 通知不来',
+ '要放开两个地方：\n1. 系统设置里允许 Schedule 发通知\n2. 电池管理里把 Schedule 设成「不限制」或者「允许后台活动」\n国产手机默认会冻结后台应用，不放开的话闹钟到点可能不响，或者响了没有声音。'],
+['会不会偷偷联网？要什么权限',
+ '只有一个联网动作：检查更新的时候读一次版本号文件，不带任何个人信息，不上传任何内容。\n权限只用三样：通知（提醒用）、精确闹钟（准点响）、存储（导入课表和导出备份）。\n不读通讯录、不读相册、不读位置。所有任务和课表都存在你自己手机里。'],
+['换手机了，数据怎么搬过去',
+ '设置 → 数据 → 导出，会存成一个文件，拷到新手机。\n新手机装好 App，用「恢复」选中那个文件就行。\n也可以点「复制」，把内容发到自己微信里，新手机上「从剪贴板恢复」。'],
+['更新版本会不会把数据弄丢',
+ '不会。更新只是换程序，数据存在手机里独立的位置，覆盖安装不影响。\n但有一个坑：卸载再装会把数据一起删掉。换手机、重装之前，先导出一份备份。'],
+['打不开 / 闪退',
+ '先卸载重装试试（记得先导出备份）。\n如果还是不行，把手机型号和系统版本发给我，我看看是不是兼容问题。别自己反复装，容易把数据搞丢。'],
+]],
 ['精力怎么算',[
 ['精力是怎么算的？',
  '每天从 100 分开始，每完成一件事就扣掉它对应的消耗，剩下的就是当前精力。\n只算今天打勾完成的事，没做的、计划中的都不扣。'],
@@ -7207,6 +7841,13 @@ var HELP=[
  '课表写的是「第 3-15 周」，要显示在日历上就得知道哪天是第 1 周。\n填第 1 周<b>周一</b>的日期，之后每天是第几周自动推算。不填的话课程不会出现。'],
 ['每节课的时间怎么改？',
  '设置 → 课表 → 节次时间。默认是广西大学的作息（第 1 节 8:00，晚上从第 11 节开始）。\n其他学校换成自己的就行，留空表示那一节不排课。'],
+['作息一节一节填太慢，有没有快一点的办法？',
+ '点「设置 → 课表 → 节次时间」，表格上面有两个按钮。\n\n一键生成：只填几个数——第 1 节几点开始、每节课多少分钟、课间多少分钟、上午几节、下午第 1 节几点开始、一共几节，剩下的全算出来。\n注意：学校上午二、三节之间常有大课间（二十分钟那种），生成后看一眼那两节，对不上就手动改一下，比一节节填还是省事。\n\n粘贴作息：学校通知上怎么写的就怎么粘，一行一节。「第1节 08:00-08:45」「1：08:00-08:45」「08:00~08:45」「第一节 8:00至8:45」都认；没写节次号的按顺序编号；认出几行就填几行，认不出的那行会跳过去并提示。粘完是先填进表格给你看，确认没问题再点保存。'],
+['列表里没有我的学校，又不知道怎么填',
+ '三条路，从省事到麻烦排：\n\n一、去浏览器搜。点「按学校自动填」，输入校名，下面会出现「去搜「XX大学」的作息表」，点开就是搜索结果。找到学校教务处的表，把时间那几列复制下来。\n\n二、让 AI 帮你整理。点「粘贴作息」→「不知道怎么写？让 AI 帮我整理」，会复制一段提示语，粘给豆包/DeepSeek/Kimi 都行。你只要说得出「第一节几点开始、一节课多久、课间多久、上午几节、下午几点开始」，它就会给你整理成一行一节的格式，复制回来粘上就行。\n\n三、自己填。点「一键生成」，填开始时间和每节时长，先出一版，再挑不对的那几节改。\n\n三条路最后都落到同一个表格上，填完看一眼再保存。'],
+['换了学校 / 换校区，作息对不上怎么办？',
+ '重新粘一次或生成一次就行，旧数据会被覆盖。\n如果只是某几节不一样，直接在表格里改那几个时间，不用整张重来。'],
+
 ['调课怎么办？',
  '点时间轴上的课程块 → 可以「停这一次」或者「改时间/地点」。\n只影响那一天，其他周照常。'],
 ]],
@@ -7232,6 +7873,24 @@ var HELP=[
 
 /* 常见疑问的英文版，和 HELP 一一对应（顺序、分组数完全一致） */
 var HELP_EN=[
+['Install & compatibility',[
+['Will it run on my phone?',
+ 'Android 5.0 and up. Anything bought after 2016 should be fine.\nOn first launch you pick a language \u2014 Chinese or English. You can change it later in Settings.\nIf you see a blank screen, or the bottom bar sits in the middle of the page, or course cards have no background colour, it is almost always an old system WebView \u2014 see the next item.'],
+['Layout looks broken / bottom bar in the middle / course cards transparent',
+ 'Your phone\u2019s built-in WebView is too old. It is not a bug in the app.\nFix: search for \u201cAndroid System WebView\u201d in your app store, update it, then reopen Schedule.\nTo check what you have: Settings \u2192 scroll to the very bottom \u2014 it shows \u201cWebView xxx\u201d followed by all good / fine / partially degraded.'],
+['How do I add the home-screen widget?',
+ 'Long-press an empty spot on the home screen \u2192 Widgets \u2192 Schedule. There are three fixed sizes (4\u00d74, 4\u00d75, 4\u00d76); pick one and drag it out. They cannot be resized, that is intended.\nThe widget rolls over to the new day after midnight. If it is stuck on yesterday, open the app once and it redraws.\nSome phones (Huawei, Honor, OPPO) freeze background apps aggressively \u2014 allow Schedule to run in the background under Settings \u2192 Apps \u2192 Schedule \u2192 Battery.'],
+['Reminders do not ring / no notifications',
+ 'Two things need to be allowed:\n1. Let Schedule send notifications in system settings\n2. Set Schedule to \u201cunrestricted\u201d or \u201callow background activity\u201d in battery settings\nChinese ROMs freeze background apps by default, so alarms may fire late or silently otherwise.'],
+['Does it phone home? What permissions?',
+ 'One network request only: reading a small version file when you check for updates. No personal data, nothing uploaded.\nThree permissions: notifications (reminders), exact alarms (fire on time), storage (import timetables / export backups).\nNo contacts, no photos, no location. Everything stays on your phone.'],
+['How do I move my data to a new phone?',
+ 'Settings \u2192 Data \u2192 Export gives you a file \u2014 copy it over.\nOn the new phone, install the app and use Restore with that file.\nOr hit Copy and send the text to yourself; then paste it back on the new phone.'],
+['Will updating erase my data?',
+ 'No. Updating only replaces the program; your data lives elsewhere on the phone and survives an overwrite install.\nOne catch: uninstalling deletes everything. Export a backup before switching phones or reinstalling.'],
+['It will not open / it crashes',
+ 'Try reinstalling (export a backup first).\nIf it still fails, send me your phone model and system version and I will look into it. Please do not keep reinstalling \u2014 you may lose data.'],
+]],
 ['How focus works',[
 ['How is focus calculated?',
  'Each day starts at 100. Finishing something subtracts its cost; what is left is your focus.\nOnly items ticked today count — planned or unfinished ones cost nothing.'],
@@ -7988,7 +8647,16 @@ function openSettings(){
       '<div class="row" id="rowUpd"><span class="lbl">'+UIx('checkUpd')+'</span>'+
         '<span class="tb r" id="updV" style="cursor:pointer">v'+esc(BUILD)+' ›</span></div>'+
       '<div class="hint" style="text-align:center;padding-top:10px;line-height:1.8">'+UIx('author')+'<br>'+
-        'Schedule v'+esc(BUILD)+' · '+(isApp()?UIx('verApp'):UIx('verWeb'))+'</div>'+
+        'Schedule v'+esc(BUILD)+' · '+(isApp()?UIx('verApp'):UIx('verWeb'))+
+        (function(){
+          var m=navigator.userAgent.match(/Chrome\/(\d+)/);
+          var v=m?(+m[1]):0;
+          if(!v) return '';
+          var tag = v>=111 ? (isEN()?'all good':'全部正常')
+                  : v>=84  ? (isEN()?'fine':'基本正常')
+                           : (isEN()?'degraded':'部分样式降级');
+          return '<br><span style="opacity:.7">WebView '+v+' · '+tag+'</span>';
+        })()+'</div>'+
     '</div>');
   function syncVals(){
     $('#vDs',sh).textContent=String(st.dayStart).padStart(2,'0')+':00';
@@ -8400,12 +9068,24 @@ function checkUpdate(){
 }
 
 /* ---------- 检查更新（走原生请求，不受 NET_ON 影响） ---------- */
-var UPD_AT='planly.updAt', UPD_SHOWN='planly.updShown', UPD_GAP=24*3600*1000;
+var UPD_AT='planly.updAt', UPD_SHOWN='planly.updShown', UPD_FAIL='planly.updFail', UPD_APKVER='planly.apkVer';
+var UPD_GAP=6*3600*1000;      /* 查到之后隔多久再查：6 小时（原来是 24 小时，太长了容易错过发版） */
+var UPD_FAIL_GAP=20*60*1000;  /* 没查通就 20 分钟后再试，别因为一次网络抖动停一整天 */
 var updBusy=false, updLatest=null, updQuiet=false;
 
 function updAt(){ try{ return +(localStorage.getItem(UPD_AT)||0); }catch(e){ return 0; } }
 function updShownVer(){ try{ return localStorage.getItem(UPD_SHOWN)||''; }catch(e){ return ''; } }
-function updMark(){ try{ localStorage.setItem(UPD_AT, String(Date.now())); }catch(e){} }
+function updMark(){ try{ localStorage.setItem(UPD_AT, String(Date.now())); localStorage.removeItem(UPD_FAIL); }catch(e){} }
+function updFailMark(){ try{ localStorage.setItem(UPD_FAIL, String(Date.now())); }catch(e){} }
+function updFailAt(){ try{ return +(localStorage.getItem(UPD_FAIL)||0); }catch(e){ return 0; } }
+function updNeed(){
+  var now=Date.now();
+  if(now-updAt()>=UPD_GAP) return true;
+  if(now-updFailAt()>=UPD_FAIL_GAP) return true;
+  return false;
+}
+/* 自动检查：启动、回到前台、以及每 2 小时各看一眼，靠 updNeed() 控制真正的请求频率 */
+function updAuto(){ try{ if(!document.hidden&&updNeed()&&!updBusy) updCheck(true); }catch(e){} }
 
 function updPaint(){
   var el=document.getElementById('updV'); if(!el) return;
@@ -8418,7 +9098,75 @@ function updPaint(){
   }
 }
 
+/* ---------- 更新：线路整理 / 提示条 / 应用内下载 ---------- */
+
+/* 把版本清单里的下载地址排成"挨个试"的线路表。
+   GitHub 直链在国内经常连不上，所以同一份文件再套一层加速镜像做备份。 */
+function updUrls(info){
+  var a=[], seen={};
+  function push(u){
+    if(!u) return;
+    u=String(u).trim();
+    if(u.indexOf('http')!==0) return;
+    if(seen[u]) return;
+    seen[u]=1; a.push(u);
+  }
+  var base=[];
+  if(info&&info.url) base.push(info.url);
+  if(info&&info.mirrors&&info.mirrors.length){ for(var i=0;i<info.mirrors.length;i++) base.push(info.mirrors[i]); }
+  for(var j=0;j<base.length;j++){
+    push(base[j]);
+    var u=String(base[j]);
+    if(u.indexOf('https://github.com/')===0){
+      push('https://gh-proxy.com/'+u);
+      push('https://ghproxy.net/'+u);
+    }
+  }
+  return a;
+}
+
+/* 首页那条「有新版本」的提示条：toast 一闪就没了，普通用户根本注意不到 */
+function updBarShow(info){
+  var el=document.getElementById('updBar');
+  if(!el) return;
+  el.innerHTML='<span class="dot"></span><div class="tx">'+
+      T('新版本 <b>v'+esc(info.version)+'</b> 可以更新','<b>v'+esc(info.version)+'</b> is out')+'</div>'+
+      '<button class="go" id="updBarGo">'+T('去看看','View')+'</button>'+
+      '<button class="x" id="updBarX" aria-label="'+T('关闭','Close')+'">×</button>';
+  el.hidden=false;
+  var g=document.getElementById('updBarGo'), x=document.getElementById('updBarX');
+  if(g) g.addEventListener('click',function(){ openUpdSheet(info); });
+  if(x) x.addEventListener('click',function(){ el.hidden=true; });
+}
+
+function copyText(txt){
+  function fb(){
+    try{
+      var t=document.createElement('textarea');
+      t.value=txt; t.style.position='fixed'; t.style.top='-999px';
+      document.body.appendChild(t); t.select(); t.setSelectionRange(0,txt.length);
+      document.execCommand('copy'); t.remove();
+      toast(T('链接已复制，可以发到电脑上下载','Link copied'));
+    }catch(e){ toast(T('复制失败，请长按手动选择','Copy failed')); }
+  }
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){ toast(T('链接已复制，可以发到电脑上下载','Link copied')); },fb);
+    } else fb();
+  }catch(e){ fb(); }
+}
+
 function openUpdSheet(info){
+  var urls=updUrls(info);
+  var b=nativeApp();
+  var ready='';
+  try{
+    if(b&&b.apkReady&&b.apkReady()){
+      var av=''; try{ av=localStorage.getItem(UPD_APKVER)||''; }catch(e){}
+      if(av===String(info.version)) ready='1';
+    }
+  }catch(e){}
+  window.__dlVer=String(info.version);
   var sh=openSheet(
     '<div class="sh-h"><button class="tb" id="updClose">'+UIx('close')+'</button>'+
       '<div class="t">'+T('发现新版本','Update available')+'</div><span class="tb r"></span></div>'+
@@ -8430,19 +9178,90 @@ function openUpdSheet(info){
       '</div>'+
       '<button id="updGo" style="margin-top:4px;width:100%;padding:15px;border:0;border-radius:13px;'+
         'background:var(--accent);color:#fff;font-size:15px;font-weight:600;font-family:inherit">'+
-        T('去下载','Download')+'</button>'+
+        T(ready?'立即安装':'下载并安装', ready?'Install now':'Download & install')+'</button>'+
+      '<div class="dlbar" id="updDlBar" hidden><i id="updDlFill"></i></div>'+
+      '<div class="hint" id="updDlTip" style="text-align:center;line-height:1.7">'+
+        T('在应用内直接下载，不会跳到浏览器；\n下完自动打开安装器，覆盖安装数据不会丢。',
+          'Downloads inside the app — no browser.\nInstalls over the current version; your data stays.')+
+      '</div>'+
+      '<div class="updalt">'+
+        '<button id="updBrowser">'+T('用浏览器打开','Open in browser')+'</button>'+
+        '<button id="updCopy">'+T('复制下载链接','Copy link')+'</button>'+
+      '</div>'+
       '<div class="hint" style="text-align:center;line-height:1.7">'+
-        T('下载后直接覆盖安装，数据不会丢。\n安装时若提示「未备案」，点继续安装即可。',
-          'Install over the current app — your data stays.\nIf the system warns about filing, just continue.')+
+        T('要是怎么都下不动，点「复制下载链接」发到电脑上下，再用微信/数据线传回手机装。',
+          'If it keeps failing, copy the link and download it on a computer.')+
       '</div>'+
     '</div>');
+  var go=document.getElementById('updGo');
+  var bar=document.getElementById('updDlBar');
+  var fill=document.getElementById('updDlFill');
+  var tip=document.getElementById('updDlTip');
+  function paint(mode){
+    go.dataset.mode=mode;
+    if(mode==='install'){ go.textContent=T('立即安装','Install now'); go.style.background='var(--accent)'; go.style.color='#fff'; }
+    else if(mode==='cancel'){ go.textContent=T('取消下载','Cancel'); go.style.background='var(--chip)'; go.style.color='var(--text)'; }
+    else { go.textContent=T('下载并安装','Download & install'); go.style.background='var(--accent)'; go.style.color='#fff'; }
+  }
+  paint(ready?'install':'download');
   document.getElementById('updClose').addEventListener('click',closeSheet);
-  document.getElementById('updGo').addEventListener('click',function(){
-    var b=nativeApp();
-    if(b&&b.openUrl) b.openUrl(info.url||'');
-    else if(info.url) location.href=info.url;
+  document.getElementById('updBrowser').addEventListener('click',function(){
+    var bb=nativeApp(), u=urls[0]||'';
+    if(!u) return;
+    if(bb&&bb.openUrl) bb.openUrl(u); else location.href=u;
+  });
+  document.getElementById('updCopy').addEventListener('click',function(){ copyText(urls.join('\n')); });
+  go.addEventListener('click',function(){
+    var bb=nativeApp();
+    var m=go.dataset.mode;
+    if(m==='install'){
+      if(bb&&bb.installApk) bb.installApk();
+      else toast(T('请到文件管理里手动打开安装包','Open the APK manually'));
+      return;
+    }
+    if(m==='cancel'){ if(bb&&bb.stopDownload) bb.stopDownload(); return; }
+    if(!bb||!bb.downloadApk){
+      if(urls[0]){ if(bb&&bb.openUrl) bb.openUrl(urls[0]); else location.href=urls[0]; }
+      return;
+    }
+    paint('cancel');
+    bar.hidden=false; fill.style.width='0%';
+    tip.textContent=T('正在下载…','Downloading…');
+    try{ bb.downloadApk(JSON.stringify(urls)); }
+    catch(e){ paint('download'); tip.textContent=T('下载启动失败','Could not start download'); }
   });
 }
+
+window.__onDlProgress=function(pct){
+  var bar=document.getElementById('updDlBar'), fill=document.getElementById('updDlFill'), tip=document.getElementById('updDlTip');
+  if(!bar||!fill) return;
+  bar.hidden=false;
+  if(typeof pct!=='number'||pct<0){ if(tip) tip.textContent=T('正在下载…','Downloading…'); return; }
+  var p=Math.max(0,Math.min(100,pct));
+  fill.style.width=p+'%';
+  if(tip) tip.textContent=T('正在下载 '+p+'%','Downloading '+p+'%');
+};
+
+window.__onDlDone=function(){
+  var go=document.getElementById('updGo'), bar=document.getElementById('updDlBar'), fill=document.getElementById('updDlFill'), tip=document.getElementById('updDlTip');
+  if(fill) fill.style.width='100%';
+  if(bar) bar.hidden=true;
+  if(go){ go.dataset.mode='install'; go.textContent=T('立即安装','Install now'); go.style.background='var(--accent)'; go.style.color='#fff'; }
+  if(tip) tip.textContent=T('下载完成，正在打开安装器','Downloaded — opening installer');
+  try{ if(window.__dlVer) localStorage.setItem(UPD_APKVER, window.__dlVer); }catch(e){}
+  var b=nativeApp();
+  try{ if(b&&b.installApk) b.installApk(); }catch(e){}
+};
+
+window.__onDlFail=function(msg){
+  var go=document.getElementById('updGo'), bar=document.getElementById('updDlBar'), tip=document.getElementById('updDlTip');
+  if(bar) bar.hidden=true;
+  if(go){ go.dataset.mode='download'; go.textContent=T('重试下载','Try again'); go.style.background='var(--accent)'; go.style.color='#fff'; }
+  if(tip) tip.textContent = (msg==='已取消')
+    ? T('已取消下载','Download cancelled')
+    : T('下载失败（'+msg+'）。点下面「用浏览器打开」，或复制链接到电脑上下载。',
+        'Download failed ('+msg+'). Try the browser option below.');
+};
 
 function updCheck(silent){
   var b=nativeApp();
@@ -8453,27 +9272,34 @@ function updCheck(silent){
   if(updBusy) return;
   updBusy=true; updQuiet=!!silent;
   if(!silent) toast(T('正在检查…','Checking…'));
-  try{ b.checkUpdate(); }catch(e){ updBusy=false; }
+  /* 兜底：万一原生一直不回调（网络卡死/页面被回收），30 秒后把锁放开，
+     不然 updBusy 一直为真，之后就再也检查不了更新 */
+  var _t=setTimeout(function(){ updBusy=false; },30000);
+  window.__updUnlock=function(){ clearTimeout(_t); };
+  try{ b.checkUpdate(); }catch(e){ clearTimeout(_t); updBusy=false; }
 }
 
 /* 原生回调统一走这里（定义在全局，Java 先回调也不会丢） */
 window.__onUpdate=function(raw){
   try{
     if(!updBusy&&!raw) return;
-    updBusy=false; updMark();
+    updBusy=false;
+    if(window.__updUnlock) window.__updUnlock();
     var info=null;
     try{ info=raw?JSON.parse(raw):null; }catch(e){ info=null; }
     if(!info||!info.code){
+      updFailMark();
       if(!updQuiet) toast(T('检查失败，网络不通或版本文件读不到','Check failed — network or version file unavailable'));
       return;
     }
+    updMark();
     if(+info.code>VCODE){
       updLatest=info;
       updPaint();
       if(!updQuiet) openUpdSheet(info);
       if(updQuiet&&updShownVer()!==String(info.version)){
         try{ localStorage.setItem(UPD_SHOWN,String(info.version)); }catch(e){}
-        toast(T('有新版本 '+info.version+' · 设置里可更新','Version '+info.version+' available in Settings'));
+        updBarShow(info);
       }
     } else {
       updLatest=null;
@@ -8650,6 +9476,7 @@ function onAppFocus(){
   if(now-__focusAt<700) return;   // focus 和 visibilitychange 会连发，去重
   __focusAt=now;
   if(sync.code) scheduleSync();
+  updAuto();
   var a=purgeArchive(), b=ensureOccurrences(), d=todayISO();
   if(a||b||__focusDay!==d){ __focusDay=d; render(); }
   else refreshNowLine();          // 平时只挪一下“现在”那条线，不重绘整页
@@ -8739,6 +9566,7 @@ $('#tdTheme').addEventListener('click',function(){
     || (!document.documentElement.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
   S.settings.theme=isDark?'light':'dark';
   themeStamped=false; applyTheme(); save();
+  pushWidgetData();   /* 主题立刻推给小组件，不等 save 里那个 1.2 秒的防抖 */
   toast(isDark?'已切到浅色':'已切到深色');
 });
 $('#lTitle').addEventListener('click',openTaskFilter);
@@ -8748,9 +9576,33 @@ setInterval(function(){
   if(todayISO()!==__dayMark){ __dayMark=todayISO(); resetDailyDone(); resetPeriodDone(); save(); render(); toast(T('新的一天 · 精力回到 100','New day · energy back to 100')); }
 },60000);
 $('#ddlBar').addEventListener('click',function(){ setView('list'); });
-setTimeout(function(){
-  try{ if(Date.now()-updAt()>UPD_GAP) updCheck(true); }catch(e){}
-}, 5000);
+/* 启动 8 秒后再查（太早网络还没就绪，一失败就白等一天）；之后每次回到前台、每 2 小时各看一眼 */
+setTimeout(updAuto, 8000);
+setInterval(updAuto, 2*3600*1000);
+/* 老内核提示：只在真的会看错的时候出现（WebView < 87），点一次就不再打扰 */
+(function(){
+  try{
+    if(localStorage.getItem('planly.compatOk')) return;
+    var m=navigator.userAgent.match(/Chrome\/(\d+)/);
+    var v=m?(+m[1]):0;
+    if(!v||v>=87) return;
+    var app=document.querySelector('.app');
+    if(!app) return;
+    var d=document.createElement('div');
+    d.className='compat-bar';
+    d.innerHTML='<span>'+(isEN()
+      ? 'Something looks off? Your phone\u2019s system WebView is old \u2014 updating “Android System WebView\u201d fixes it.'
+      : '界面显示有点怪？你的手机内核偏旧，去应用商店更新「Android System WebView」就能解决')+
+      '</span><button id="cbOk">'+(isEN()?'Got it':'知道了')+'</button>';
+    var view=app.querySelector('.view');
+    app.insertBefore(d, view||app.firstChild);
+    var ok=d.querySelector('#cbOk');
+    if(ok) ok.addEventListener('click', function(){
+      try{ localStorage.setItem('planly.compatOk', String(Date.now())); }catch(e){}
+      d.remove();
+    });
+  }catch(e){}
+})();
 checkReminders();
 setInterval(checkReminders,30000);
 setMode(S.settings.mode);

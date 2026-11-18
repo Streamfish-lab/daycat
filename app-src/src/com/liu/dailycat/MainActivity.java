@@ -627,6 +627,17 @@ public class MainActivity extends Activity {
             dlStop = true;
         }
 
+        /** App 里主动要求重画小组件：只要页面数据/日期是新的，就立刻同步到桌面 */
+        @JavascriptInterface
+        public void refreshWidget() {
+            final android.content.Context _wc = MainActivity.this;
+            new Thread(new Runnable() {
+                public void run() {
+                    try { WidgetProvider.refreshAll(_wc); } catch (Exception ignored) { }
+                }
+            }).start();
+        }
+
         @JavascriptInterface
         public boolean isDownloading() {
             return dlRunning;

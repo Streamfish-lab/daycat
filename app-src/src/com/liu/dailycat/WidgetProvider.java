@@ -219,13 +219,14 @@ public class WidgetProvider extends AppWidgetProvider {
             Bitmap bmp = draw(c, data, 250, stanH, dark, tier);
 
             // 图写到文件里，再用 content:// 交给桌面：这样任意尺寸都不会撞上 1MB 上限
-            java.io.File out = WidgetImageProvider.fileOf(c, id);
+            String imgName = WidgetImageProvider.freshName(id);
+            java.io.File out = WidgetImageProvider.fileOf(c, imgName);
             java.io.FileOutputStream fo = new java.io.FileOutputStream(out);
             bmp.compress(Bitmap.CompressFormat.WEBP, 92, fo);
             fo.close();
 
             RemoteViews rv = new RemoteViews(c.getPackageName(), R.layout.widget);
-            rv.setImageViewUri(R.id.wimg, WidgetImageProvider.uriOf(id));
+            rv.setImageViewUri(R.id.wimg, WidgetImageProvider.uriOf(imgName));
             Intent open = new Intent(c, MainActivity.class);
             open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent pi = PendingIntent.getActivity(c, id, open,
@@ -233,6 +234,7 @@ public class WidgetProvider extends AppWidgetProvider {
             rv.setOnClickPendingIntent(R.id.wimg, pi);
 
             mgr.updateAppWidget(id, rv);
+            WidgetImageProvider.cleanOld(c, id, imgName);   /* 旧图留一张就够 */
             try {
                 c.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit()
                         .putString("last", System.currentTimeMillis() + "|" + bmp.getWidth() + "x"

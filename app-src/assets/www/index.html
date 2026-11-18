@@ -30,6 +30,14 @@
    Для существительных со счётом — формы по Intl.PluralRules (one / few / many / other). */
 var PLANLY_I18N = {
  "en": {
+  "月历": "Calendar",
+  "搜索标题和正文": "Search notes",
+  "已置顶": "Pinned",
+  "取消置顶": "Unpinned",
+  "搜索": "Search",
+  "添加提醒": "Add reminder",
+  "加一条": "Add one",
+  "回到顶部": "Back to top",
   "切换深浅色": "Toggle light / dark",
   "常见疑问": "FAQ",
   "设置": "Settings",
@@ -852,6 +860,11 @@ var PLANLY_I18N = {
   "Любой из вариантов можно сразу отменить подсказкой внизу.": "Beide Varianten lassen sich unten sofort rückgängig machen."
  },
  "zh": {
+  "月历": "月历",
+  "搜索": "搜索",
+  "添加提醒": "添加提醒",
+  "加一条": "加一条",
+  "回到顶部": "回到顶部",
   "切换深浅色": "切换深浅色",
   "常见疑问": "常见疑问",
   "设置": "设置",
@@ -1533,10 +1546,21 @@ html,body{transition:background-color .28s ease,color .28s ease}
 .ncard .np{font-size:13.5px;color:var(--text-2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ncard .nd{font-size:12px;color:var(--text-3);margin-top:5px;font-variant-numeric:tabular-nums}
 .nlist{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.nsearch{padding:0 16px 8px}
+.nsearch input{width:100%;border:0;background:var(--field);border-radius:11px;
+  padding:9px 12px;font:inherit;font-size:14px;color:var(--text);outline:none}
+.nsearch input::placeholder{color:var(--text-3)}
+.ncard{position:relative}
+.ncard.pin{background:var(--chip-2)}
+.ncard .npin{position:absolute;right:11px;top:11px;width:13px;height:13px;stroke:var(--accent);
+  fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.ncard.pin .nt,.ncard.pin .np{padding-right:20px}
 .nbar{display:flex;align-items:center;gap:8px;padding:calc(var(--st) + 8px) 12px 6px}
 .nbar .back{display:flex;align-items:center;gap:2px;color:var(--accent);font-size:16px}
 .nbar .back svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .nbar .grow{flex:1}
+.nmeta{font-size:11.5px;color:var(--text-3);font-variant-numeric:tabular-nums;
+  white-space:nowrap;overflow:hidden;max-width:96px;text-overflow:ellipsis}
 .ntitle{width:100%;border:0;background:transparent;outline:none;padding:6px 16px 2px;
   font:700 26px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;letter-spacing:-.4px}
 .ntitle::placeholder{color:var(--text-3)}
@@ -1577,6 +1601,7 @@ body.kb .fmtpop{bottom:calc(var(--kb,0px) + 60px)}
 .nbody ul,.nbody ol{margin:4px 0 6px;padding-left:24px}
 .nbody li{margin:1px 0}
 .nbody b,.nbody strong{font-weight:650}
+.nbody blockquote{margin:8px 0;padding:2px 0 2px 12px;border-left:3px solid var(--accent-line);color:var(--text-2)}
 
 /* ---- выбор цвета ---- */
 .swatches{display:flex;gap:10px;padding:4px 4px 2px;flex-wrap:wrap}
@@ -2268,7 +2293,7 @@ input,textarea,select{font-size:16px}
           <button data-m="scale" class="on" aria-label="Временная шкала" data-i18n-aria="Временная шкала"><svg viewBox="0 0 24 24"><path d="M4 3v18"/><rect x="8" y="4.5" width="12" height="6" rx="2"/><rect x="8" y="13.5" width="8.5" height="6" rx="2"/></svg></button>
           <button data-m="list" aria-label="Список" data-i18n-aria="Список"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg></button>
         </div>
-        <button class="ib" id="bCal" aria-label="月历"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
+        <button class="ib" id="bCal" aria-label="月历" data-i18n-aria="月历"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
         <button class="ib" id="bSet1" aria-label="Настройки" data-i18n-aria="Настройки"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.6 1.6 0 008 19.4a1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H2a2 2 0 110-4h.1A1.6 1.6 0 004.6 8a1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V2a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H22a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z"/></svg></button>
       </div>
     </div>
@@ -2289,7 +2314,7 @@ input,textarea,select{font-size:16px}
         <p class="sub" id="lSub">Без времени</p>
       </div>
       <div class="grow"></div>
-      <button class="ib" id="bSearch" aria-label="搜索"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></button>
+      <button class="ib" id="bSearch" aria-label="搜索" data-i18n-aria="搜索"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></button>
       <button class="ib" id="bSet2" aria-label="Настройки" data-i18n-aria="Настройки"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.6 1.6 0 008 19.4a1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H2a2 2 0 110-4h.1A1.6 1.6 0 004.6 8a1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V2a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H22a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z"/></svg></button>
     </div>
     <div class="ddlwrap"><div class="ddlbox" id="ddlBox"></div></div>
@@ -2309,12 +2334,15 @@ input,textarea,select{font-size:16px}
       <div class="grow"></div>
       <button class="ib" id="bSet4" aria-label="Настройки" data-i18n-aria="Настройки"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.6 1.6 0 008 19.4a1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H2a2 2 0 110-4h.1A1.6 1.6 0 004.6 8a1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V2a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H22a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z"/></svg></button>
     </div>
+    <div class="nsearch"><input id="nSearch" type="search" autocomplete="off"
+      placeholder="搜索标题和正文" data-i18n-ph="搜索标题和正文"></div>
     <div class="scroll" id="notes"></div>
   </section>
 
   <section class="view" id="v-note">
     <div class="nbar">
       <button class="back" id="nBack"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><span data-i18n="Заметки">Заметки</span></button>
+      <span class="nmeta" id="nMeta"></span>
       <div class="grow"></div>
       <button class="tb r" id="nToTasks" style="min-width:0" data-i18n="В дела">В дела</button>
       <button class="tb r" id="nDel" style="color:var(--red);min-width:0" data-i18n="Удалить">Удалить</button>
@@ -2699,7 +2727,7 @@ var WD=(function(){
   return out;
 })();
 var KEEP_DAYS=14;
-var BUILD='2.0.44'; var VCODE=158;
+var BUILD='2.0.46'; var VCODE=160;
 /* 装进 APK 后以安装包里的真实版本为准 —— 免得改了 manifest 忘了改这两行 */
 (function(){
   try{
@@ -3032,7 +3060,7 @@ function normalizeSeries(x){
     from:x.from||todayISO(),skip:x.skip||{},ruleUpd:x.ruleUpd||0,upd:x.upd||0};
 }
 function seriesById(id){for(var i=0;i<S.series.length;i++)if(S.series[i].id===id)return S.series[i];return null;}
-function normalizeNote(x){return {id:x.id||uid(),title:x.title||'',body:x.body||'',upd:x.upd||0};}
+function normalizeNote(x){return {id:x.id||uid(),title:x.title||'',body:x.body||'',upd:x.upd||0,pin:!!x.pin};}
 function noteById(id){for(var i=0;i<S.notes.length;i++)if(S.notes[i].id===id)return S.notes[i];return null;}
 function normalizeSubs(a){
   if(!Array.isArray(a)) return [];
@@ -4746,9 +4774,11 @@ function renderToday(){
         if(!was){
           justDone=t.id;
           var r=el.getBoundingClientRect(); confetti(r.left+r.width/2,r.top+24);
-          setTimeout(function(){ justDone=''; },1400);
         }
         render();
+        /* pop 只给紧接着的这一次渲染用。原来靠 1.4 秒定时器清，
+           这期间任何一次重绘都会重新带上 class，动画就又播一遍。 */
+        justDone='';
         if(!was) toast(UIx('toastDone',{n:energyCost(t)}));
         return;
       }
@@ -4758,7 +4788,7 @@ function renderToday(){
 }
 
 /* ---------- render ---------- */
-function render(){snapToday();renderToday();renderHead();renderStrip();renderTimeline();renderDayList();renderBacklog();renderArchive();renderNotes();renderDDL();applyTlTop();}
+function render(){snapToday();renderToday();renderHead();renderStrip();renderTimeline();renderDayList();renderBacklog();renderArchive();renderNotes();renderDDL();applyTlTop();try{pushWidget();}catch(e){}}
 
 /* 日期标题按可用宽度自动缩字号，宁可小一点也要显示全，不再出现「11月…」 */
 function fitDayTitle(){
@@ -5478,33 +5508,99 @@ function fmtStamp(ms){
   if(day===addDays(todayISO(),-1)) return tr('Вчера,')+' '+t;
   return d.toLocaleDateString(LOCALE,{day:'numeric',month:'short'})+', '+t;
 }
+var noteQ='';
+function noteMatch(x,q){
+  if(!q) return true;
+  var hay=((x.title||'')+' '+textOf(x.body)).toLowerCase();
+  return hay.indexOf(q)>=0;
+}
 function renderNotes(){
-  var box=$('#notes'), list=S.notes.slice().sort(function(a,b){return (b.upd||0)-(a.upd||0);});
-  $('#nSub').textContent=list.length? list.length+' '+plur(list.length,"заметка","заметки","заметок") : tr('Пусто');
+  var box=$('#notes');
+  var q=(noteQ||'').trim().toLowerCase();
+  var list=S.notes.filter(function(x){ return noteMatch(x,q); });
+  /* 置顶的排最前，其余按最近修改 */
+  list.sort(function(a,b){
+    if(!!b.pin!==!!a.pin) return (b.pin?1:0)-(a.pin?1:0);
+    return (b.upd||0)-(a.upd||0);
+  });
+  var total=S.notes.length;
+  $('#nSub').textContent = total ? (q ? (list.length+' / '+total) : (total+' '+plur(total,"заметка","заметки","заметок"))) : tr('Пусто');
+  var sw=$('.nsearch'); if(sw) sw.hidden = total===0 && !q;
   if(!list.length){
-    box.innerHTML='<div class="blank"><div class="gl"><svg viewBox="0 0 24 24"><path d="M5 4h10l4 4v12a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M15 4v4h4M8 12h8M8 16h5"/></svg></div>'+
-      tr('Наброски, идеи, заготовки по темам.')+'<br>'+tr('Нажми +, чтобы написать первую.')+'</div>';
+    box.innerHTML = q
+      ? '<div class="blank"><div class="gl"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></div>'+
+        T('没有匹配「'+esc(q)+'」的笔记','Nothing matches "'+esc(q)+'"')+'</div>'
+      : '<div class="blank"><div class="gl"><svg viewBox="0 0 24 24"><path d="M5 4h10l4 4v12a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M15 4v4h4M8 12h8M8 16h5"/></svg></div>'+
+        tr('Наброски, идеи, заготовки по темам.')+'<br>'+tr('Нажми +, чтобы написать первую.')+'</div>';
     return;
   }
+  var pinSvg='<svg class="npin" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 4 3v2H6v-2l4-3z"/><path d="M12 15v5"/></svg>';
   box.innerHTML='<div class="nlist">'+list.map(function(x){
     var txt=textOf(x.body), title=x.title||txt.split(/[.!?\n]/)[0].trim().slice(0,60)||tr('Без названия');
     var prev=x.title?txt:txt.slice(title.length).trim();
-    return '<button class="ncard" data-id="'+x.id+'"><div class="nt">'+esc(title)+'</div>'+
+    return '<button class="ncard'+(x.pin?' pin':'')+'" data-id="'+x.id+'">'+(x.pin?pinSvg:'')+
+      '<div class="nt">'+esc(title)+'</div>'+
       (prev?'<div class="np">'+esc(prev.slice(0,140))+'</div>':'')+
       '<div class="nd">'+esc(fmtStamp(x.upd))+'</div></button>';
   }).join('')+'</div>';
 }
+/* 搜索：输入即过滤，列表在搜索框外面重建，不会丢焦点 */
+(function(){
+  var si=$('#nSearch');
+  if(!si) return;
+  si.addEventListener('input',function(){ noteQ=si.value; renderNotes(); });
+})();
+/* 长按卡片：置顶 / 取消置顶 */
+var nPinBusy=false;
+function togglePin(id){
+  var x=noteById(id); if(!x) return;
+  x.pin=!x.pin;
+  notePinHit=Date.now();
+  save(); renderNotes();
+  toast(x.pin ? T('已置顶','Pinned') : T('取消置顶','Unpinned'));
+}
+var notePinHit=0;
+(function(){
+  var box=$('#notes'), tmr=0;
+  box.addEventListener('touchstart',function(e){
+    var c=e.target.closest('.ncard'); if(!c) return;
+    var id=c.dataset.id;
+    clearTimeout(tmr);
+    tmr=setTimeout(function(){ togglePin(id); },520);
+  },{passive:true});
+  box.addEventListener('touchend',function(){ clearTimeout(tmr); });
+  box.addEventListener('touchmove',function(){ clearTimeout(tmr); },{passive:true});
+})();
 $('#notes').addEventListener('click',function(e){
-  var c=e.target.closest('.ncard'); if(c) openNote(c.dataset.id);
+  var c=e.target.closest('.ncard'); if(!c) return;
+  if(Date.now()-notePinHit<600) return;   /* 刚长按置顶过，别再顺手打开 */
+  openNote(c.dataset.id);
 });
 
-var noteId=null, noteTimer=0;
+var noteId=null, noteTimer=0, noteSavedT=0;
+
+/* 字数：标题 + 正文，去掉空白按字符算（中文按字、英文按字母） */
+function noteChars(){
+  var body=$('#nBody'), title=$('#nTitle');
+  if(!body) return 0;
+  var a=textOf(body.innerHTML).replace(/\s/g,'').length;
+  var b=(title && title.value || '').trim().replace(/\s/g,'').length;
+  return a+b;
+}
+function updNoteMeta(saved){
+  var el=$('#nMeta'); if(!el) return;
+  var n=noteChars();
+  var t=n ? (n+' '+T('字','chars')) : '';
+  if(saved) t = t ? (t+' · '+T('已保存','saved')) : T('已保存','saved');
+  el.textContent=t;
+}
 function openNote(id){
   var x=noteById(id); if(!x) return;
   noteId=id;
   $('#nTitle').value=x.title||'';
   $('#nBody').innerHTML=x.body||'';
   setView('note');
+  updNoteMeta(false);
   if(!x.title&&!x.body) setTimeout(function(){ $('#nTitle').focus(); },60);
 }
 function newNote(){
@@ -5517,6 +5613,9 @@ function flushNote(){
   var title=$('#nTitle').value.trim(), body=cleanHTML($('#nBody').innerHTML);
   if(!textOf(body)) body='';
   if(title!==x.title||body!==x.body){ x.title=title; x.body=body; save(); }
+  updNoteMeta(true);
+  clearTimeout(noteSavedT);
+  noteSavedT=setTimeout(function(){ updNoteMeta(false); },1600);
 }
 function closeNote(){
   flushNote();
@@ -5524,9 +5623,38 @@ function closeNote(){
   if(x&&!x.title&&!x.body){ S.notes=S.notes.filter(function(y){return y.id!==x.id;}); save(); }
   noteId=null; setView('notes'); renderNotes();
 }
-function queueNote(){ clearTimeout(noteTimer); noteTimer=setTimeout(flushNote,600); }
+function queueNote(){ updNoteMeta(false); clearTimeout(noteTimer); noteTimer=setTimeout(flushNote,600); }
 $('#nTitle').addEventListener('input',queueNote);
 $('#nBody').addEventListener('input',queueNote);
+
+/* Markdown 快捷输入：行首打 # / ## / - / 1. / > 再按空格，直接变成对应格式。
+   只在「整块内容就是这几个符号」时转换，避免误伤正常输入；出错就静默跳过。 */
+$('#nBody').addEventListener('keydown',function(e){
+  try{
+    if(e.key!==' '||e.ctrlKey||e.metaKey||e.altKey) return;
+    var sel=window.getSelection();
+    if(!sel||!sel.rangeCount||!sel.isCollapsed) return;
+    var body=$('#nBody'), node=sel.anchorNode;
+    if(!node||!body.contains(node)) return;
+    var blk=node;
+    while(blk&&blk.parentNode&&blk.parentNode!==body) blk=blk.parentNode;
+    if(!blk||blk===body) return;
+    var t=(blk.textContent||'');
+    var map={'#':'H2','##':'H3','-':'UL','*':'UL','1.':'OL','>':'QUOTE'};
+    var tag=map[t];
+    if(!tag) return;
+    e.preventDefault();
+    var r=document.createRange();
+    r.selectNodeContents(blk);
+    sel.removeAllRanges(); sel.addRange(r);
+    document.execCommand('delete',false,null);
+    if(tag==='UL') document.execCommand('insertUnorderedList',false,null);
+    else if(tag==='OL') document.execCommand('insertOrderedList',false,null);
+    else if(tag==='QUOTE') document.execCommand('formatBlock',false,'BLOCKQUOTE');
+    else document.execCommand('formatBlock',false,tag);
+    queueNote();
+  }catch(err){}
+});
 $('#nBack').addEventListener('click',closeNote);
 $('#nSave').addEventListener('click',function(){ flushNote(); toast(T('已保存','Saved'),true); });
 $('#nDone').addEventListener('click',function(){ closeNote(); });
@@ -6167,6 +6295,8 @@ function openSheet(html){
   bdEl=document.createElement('div'); bdEl.className='bd'; bdEl.addEventListener('click',closeSheet);
   sheetEl=document.createElement('div'); sheetEl.className='sheet'; sheetEl.innerHTML='<div class="grab"></div>'+html;
   document.body.appendChild(bdEl); document.body.appendChild(sheetEl);
+  /* 面板里的文案是动态拼进来的，静态翻译只跑过一次，这里补一次 */
+  try{ translateStatic(); }catch(e){}
   return sheetEl;
 }
 function closeSheet(){
@@ -9069,7 +9199,7 @@ function checkUpdate(){
 
 /* ---------- 检查更新（走原生请求，不受 NET_ON 影响） ---------- */
 var UPD_AT='planly.updAt', UPD_SHOWN='planly.updShown', UPD_FAIL='planly.updFail', UPD_APKVER='planly.apkVer';
-var UPD_GAP=6*3600*1000;      /* 查到之后隔多久再查：6 小时（原来是 24 小时，太长了容易错过发版） */
+var UPD_GAP=2*3600*1000;      /* 查到之后隔多久再查：2 小时（原来是 24 小时，太久容易错过发版） */
 var UPD_FAIL_GAP=20*60*1000;  /* 没查通就 20 分钟后再试，别因为一次网络抖动停一整天 */
 var updBusy=false, updLatest=null, updQuiet=false;
 
@@ -9079,10 +9209,13 @@ function updMark(){ try{ localStorage.setItem(UPD_AT, String(Date.now())); local
 function updFailMark(){ try{ localStorage.setItem(UPD_FAIL, String(Date.now())); }catch(e){} }
 function updFailAt(){ try{ return +(localStorage.getItem(UPD_FAIL)||0); }catch(e){ return 0; } }
 function updNeed(){
-  var now=Date.now();
-  if(now-updAt()>=UPD_GAP) return true;
-  if(now-updFailAt()>=UPD_FAIL_GAP) return true;
-  return false;
+  var now=Date.now(), okAt=updAt(), fa=updFailAt();
+  /* 成功查过且还在 2 小时窗口内：除非之后又查失败了，否则不重复请求。
+     注意 fa 为 0 表示「没有失败记录」，不能直接拿 now-fa 去比——
+     now-0 永远是巨大值，那样写会恒为真，节流等于没有。 */
+  if(okAt>0 && now-okAt<UPD_GAP) return fa>0 && now-fa>=UPD_FAIL_GAP;
+  if(fa>0 && now-fa<UPD_FAIL_GAP) return false;
+  return true;
 }
 /* 自动检查：启动、回到前台、以及每 2 小时各看一眼，靠 updNeed() 控制真正的请求频率 */
 function updAuto(){ try{ if(!document.hidden&&updNeed()&&!updBusy) updCheck(true); }catch(e){} }
@@ -9325,6 +9458,18 @@ function applyTheme(){
   if(m) m.setAttribute('content',getComputedStyle(document.body).backgroundColor);
 }
 function setView(v){
+  /* 切页前把「只播一次」的动画 class 摘掉。
+     .view 是 display:none，隐藏时 CSS 动画会被重置回起点，
+     再切回来就会从头重播一遍——打钩的庆祝高亮、猫的气泡、猫的跳跃都会。
+     顺手把 justDone 也清掉，避免下一次重绘又勾上。 */
+  try{
+    var _ones=document.querySelectorAll('.tcard.pop,.bubble.pop,.catwrap.hop');
+    for(var _i=0;_i<_ones.length;_i++){
+      _ones[_i].classList.remove('pop');
+      _ones[_i].classList.remove('hop');
+    }
+    justDone='';
+  }catch(e){}
   if(S.view==='day'&&v!=='day'){ var __w=$('#tlwrap'); if(__w&&__w.clientHeight) tlTopSet(__w.scrollTop); }   // 走之前把位置钉住
   if(S.view==='note'&&v!=='note'&&noteId){ flushNote(); }
   S.view=v;
@@ -9471,12 +9616,25 @@ function refreshNowLine(){
   el.style.top=((m-dayMin())*pxMin())+'px';
 }
 var __focusDay=null, __focusAt=0;
+/* 主动让桌面小组件重画：打开 App、切回前台、数据变化后都推一次。
+   限流 20 秒，避免频繁重画耗电。 */
+var __wgT=0;
+function pushWidget(){
+  var b=nativeApp();
+  if(!b||!b.refreshWidget) return;
+  var now=Date.now();
+  if(now-__wgT<20000) return;
+  __wgT=now;
+  try{ b.refreshWidget(); }catch(e){}
+}
+
 function onAppFocus(){
   var now=Date.now();
   if(now-__focusAt<700) return;   // focus 和 visibilitychange 会连发，去重
   __focusAt=now;
   if(sync.code) scheduleSync();
   updAuto();
+  pushWidget();
   var a=purgeArchive(), b=ensureOccurrences(), d=todayISO();
   if(a||b||__focusDay!==d){ __focusDay=d; render(); }
   else refreshNowLine();          // 平时只挪一下“现在”那条线，不重绘整页

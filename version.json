@@ -1,6 +1,10 @@
 {
-  "version": "2.0.7",
-  "code": 121,
-  "url": "https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk",
-  "notes": "· 修设置页版本号一直显示 2.0.1 的问题，改为从安装包读取\n· 修「检查更新」会误报有新版本的问题\n· 打包脚本自动同步版本号，不会再错开"
+  "version": "2.0.46",
+  "code": 160,
+  "url": "https://gh-proxy.com/https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk",
+  "mirrors": [
+    "https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk",
+    "https://ghproxy.net/https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk"
+  ],
+  "notes": "· 修：过了零点小组件还停在昨天——桌面缓存了旧图，现在每次都换新图名\n· 修：打开 App 时小组件不跟着变，现在进前台就会同步\n· 修：完成任务的庆祝动画，切页回来会重播\n· 笔记加搜索、长按置顶、字数、Markdown 快捷"
 }

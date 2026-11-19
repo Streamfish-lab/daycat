@@ -1546,6 +1546,13 @@ html,body{transition:background-color .28s ease,color .28s ease}
 .ncard .np{font-size:13.5px;color:var(--text-2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ncard .nd{font-size:12px;color:var(--text-3);margin-top:5px;font-variant-numeric:tabular-nums}
 .nlist{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.citab{display:flex;gap:6px;margin-bottom:10px}
+.citab button{flex:1;padding:9px 4px;border:0;border-radius:10px;background:var(--chip);
+  color:var(--text-2);font:inherit;font-size:12.5px;transition:.15s}
+.citab button.on{background:var(--accent);color:#fff;font-weight:600}
+.cipick{width:100%;margin-top:12px;padding:13px;border:0;border-radius:12px;background:var(--accent);
+  color:#fff;font:inherit;font-size:14.5px;font-weight:600}
+.cipick:active{opacity:.85}
 .nsearch{padding:0 16px 8px}
 .nsearch input{width:100%;border:0;background:var(--field);border-radius:11px;
   padding:9px 12px;font:inherit;font-size:14px;color:var(--text);outline:none}
@@ -2715,7 +2722,7 @@ function translateStatic(){
 }
 
 var KEY='planly.v1';
-var DEF={theme:'auto',dayStart:7,dayEnd:23,hour:64,snap:5,dur:60,mode:'scale',accent:'green',lang:'zh',foldFixed:false,foldExtra:false,foldTlFixed:false,foldTlPlain:false,foldDue:false,taskFilter:'plain',bkFold:{},foldPeriod:{},termStart:'',periods:null,showCourse:true};
+var DEF={theme:'auto',dayStart:7,dayEnd:23,hour:40,snap:5,dur:60,mode:'scale',accent:'green',lang:'zh',foldFixed:false,foldExtra:false,foldTlFixed:false,foldTlPlain:false,foldDue:false,taskFilter:'plain',bkFold:{},foldPeriod:{},termStart:'',periods:null,showCourse:true};
 var ACCENTS=[['green',tr('Зелёный'),'23,160,94'],['blue',tr('Синий'),'10,124,255'],['indigo',tr('Индиго'),'88,86,214'],
   ['purple',tr('Фиолетовый'),'175,82,222'],['pink',tr('Розовый'),'224,64,124'],['teal',tr('Бирюзовый'),'18,165,178'],['graphite',tr('Графит'),'72,72,74']];
 var WD=(function(){
@@ -2727,7 +2734,7 @@ var WD=(function(){
   return out;
 })();
 var KEEP_DAYS=14;
-var BUILD='2.0.46'; var VCODE=160;
+var BUILD='2.0.52'; var VCODE=166;
 /* 装进 APK 后以安装包里的真实版本为准 —— 免得改了 manifest 忘了改这两行 */
 (function(){
   try{
@@ -3442,7 +3449,11 @@ function normalizeCourse(c){
 function courseById(id){ for(var i=0;i<S.courses.length;i++) if(S.courses[i].id===id) return S.courses[i]; return null; }
 /* "3-4周,6-15周" / "第8周" / "2周,5-8周" → [3,4,6,...] */
 function parseWeeks(str){
-  var out=[], parts=String(str||'').split(/[,，、;；\s]+/);
+  var raw=String(str||''), par=null;
+  if(/[（(]\s*单\s*[)）]|单周/.test(raw)) par='odd';
+  else if(/[（(]\s*双\s*[)）]|双周/.test(raw)) par='even';
+  raw=raw.replace(/[（(]\s*[单双]\s*[)）]/g,'').replace(/[单双]周/g,'');
+  var out=[], parts=raw.split(/[,，、;；\s]+/);
   parts.forEach(function(p){
     if(!p) return;
     var m1=p.match(/^第?(\d+)周?$/);
@@ -3451,7 +3462,21 @@ function parseWeeks(str){
     if(m2){ var a=+m2[1],b=+m2[2]; for(var i=a;i<=b;i++) out.push(i); return; }
   });
   out=out.filter(function(v,i,a){ return v>0&&v<40&&a.indexOf(v)===i; });
+  if(par==='odd') out=out.filter(function(x){ return x%2===1; });
+  if(par==='even') out=out.filter(function(x){ return x%2===0; });
   return out.sort(function(x,y){return x-y;});
+}
+/* 周次列：先按「N周」找，找不到再按纯数字区间找（表头已经写明是周次时很常见） */
+function wkAny(v){
+  var t=String(v==null?'':v).trim();
+  if(!t) return null;
+  var w=wkFrom(t);
+  if(w&&w.length) return w;
+  if(/^[\d\s,，、;；\-—~至.]+$/.test(t)){
+    var w2=parseWeeks(t);
+    if(w2&&w2.length) return w2;
+  }
+  return null;
 }
 function weekLabelOf(weeks){
   var en=isEN();
@@ -4368,6 +4393,14 @@ function todayTasks(){
     if(xs!==ys) return xs-ys;
     return (x.ord||0)-(y.ord||0);
   });
+}
+/* 问候语只跟着「现在几点」变。原来只在整页重绘时才算一次，
+   App 从后台放一夜再进来、或凌晨用过一次，就会一直停在「夜深了」。 */
+function refreshGreet(){
+  var el=document.getElementById('tdGreet');
+  if(!el) return;
+  var w=greetWord();
+  if(el.textContent!==w) el.textContent=w;
 }
 function greetWord(){
   var h=new Date().getHours(), i=0;
@@ -6717,6 +6750,10 @@ function wdLoose(s){
 /* 节次：(1-2节) / 第3节 / 1-2 / 5 */
 function jcFrom(s){
   var t=cdNorm(s).replace(/\s+/g,'');
+  /* 不少学校的「节次」列写成「上午 1-2」「下午 5-6」，
+     原来这里是整串匹配 ^数字-数字$，一带前缀就认不出，整块课会被丢掉。
+     先把时段词剥掉再匹配。 */
+  t=t.replace(/^(上午|下午|晚上|中午|早晨|早上|夜间|时段|白天)[:：]?/,'');
   if(!t) return null;
   var m=t.match(/第?(\d{1,2})\s*[-—~至]\s*(\d{1,2})\s*节/);
   if(m) return [+m[1],+m[2]];
@@ -6740,20 +6777,23 @@ function tmFrom(s){
 /* 周次：7-18周 / 5-19周(单) / 1,3,5周 */
 function wkFrom(s){
   var t=cdNorm(s).replace(/\s+/g,'');
-  var m=t.match(/(\d{1,2}(?:[-—~至]\d{1,2})?(?:[,，、]\d{1,2}(?:[-—~至]\d{1,2})?)*)周/);
-  if(!m) return null;
-  var body=m[1], par=null;
-  var tail=t.slice(m.index+m[0].length);
-  if(/^[（(]单[)）]/.test(tail)) par='odd';
-  else if(/^[（(]双[)）]/.test(tail)) par='even';
-  if(!par){ if(/单周/.test(t)) par='odd'; else if(/双周/.test(t)) par='even'; }
-  var out=[], parts=body.split(/[,，、]/);
-  parts.forEach(function(p){
-    p=p.replace(/\s/g,'');
-    var r=p.match(/^(\d{1,2})[-—~至](\d{1,2})$/);
-    if(r){ for(var i=+r[1];i<=+r[2];i++) out.push(i); return; }
-    if(/^\d{1,2}$/.test(p)) out.push(+p);
-  });
+  if(!t) return null;
+  var par=null;
+  if(/[（(]\s*单\s*[)）]|单周/.test(t)) par='odd';
+  else if(/[（(]\s*双\s*[)）]|双周/.test(t)) par='even';
+  /* 逐段扫「N周」「N-M周」，每段都允许自带「周」字。
+     原来的写法要求所有段挤在同一个「周」前面（2-3,5-15周），
+     遇到「3-4周,6-15周」只取到第一段，后面的周次全丢。 */
+  var out=[], hit=false, m;
+  var re=/(\d{1,2})(?:[-—~至](\d{1,2}))?\s*周/g;
+  while((m=re.exec(t))!==null){
+    hit=true;
+    var a=+m[1], b=m[2]?+m[2]:a;
+    if(b<a){ var tmp=a; a=b; b=tmp; }
+    if(b-a>30) b=a+30;
+    for(var i=a;i<=b;i++) out.push(i);
+  }
+  if(!hit) return null;
   if(par==='odd') out=out.filter(function(x){return x%2===1;});
   if(par==='even') out=out.filter(function(x){return x%2===0;});
   out=out.filter(function(v,i,a){ return v>0&&v<40&&a.indexOf(v)===i; });
@@ -6984,6 +7024,47 @@ function finishCell(co){
   co.name=co.name.replace(/\s+$/,'');
   return co.name?co:null;
 }
+/* 让 AI 把课表【转成规整的 Excel/CSV】：用户拿到文件再回来选文件 */
+function aiPromptExcel(){
+  if(isEN()){
+    return [
+      'I have a university timetable (image / PDF / web page below). Please convert it into a clean table file (Excel or CSV) that I can import into a phone app.',
+      '',
+      'Requirements:',
+      '1. Header row, exactly these 6 columns in this order:',
+      '   Course | Weekday | Period | Weeks | Room | Teacher',
+      '2. From row 2 on, one class per row. A class that meets twice a week takes two rows.',
+      '3. Weekday: 星期一 … 星期日 (Chinese).',
+      '4. Period: 1-2 for a two-period block, 5 for a single period.',
+      '5. Weeks: 1-16, or 3-4,6-15. Odd weeks only: 1-16(单). Even weeks only: 2-16(双).',
+      '6. Room: building + room number, empty if none. Teacher: empty if none.',
+      '7. No merged cells, no index column, no notes inside the table.',
+      '8. If one cell holds several classes, split it into several rows.',
+      '9. Keep week ranges as written — 3-4周,6-15周 must not be merged into 3-15周.',
+      '10. Give me a downloadable .xlsx or .csv file. If you cannot produce a file, give comma-separated table text.',
+      '',
+      'Do not explain. Just the table.'
+    ].join('\n');
+  }
+  return [
+    '我有一份大学课表（图片/PDF/网页在下面）。请帮我转成一个规整的表格文件（Excel 或 CSV），我要导入到手机 App。',
+    '',
+    '表格要求：',
+    '1. 第一行是表头，固定这 6 列，顺序不要变：',
+    '   课程名称 | 星期 | 节次 | 周次 | 地点 | 教师',
+    '2. 从第二行开始，一行一门课；同一门课一周上两次就写两行',
+    '3. 星期写 星期一、星期二 … 星期日',
+    '4. 节次写 1-2（连上两节）或 5（只上一节），不要加别的字',
+    '5. 周次写 1-16 或 3-4,6-15；只有单周写 1-16(单)，只有双周写 2-16(双)',
+    '6. 地点写楼名加房间号，没有就留空；教师没有也留空',
+    '7. 不要合并单元格，不要加序号列，不要在表格里写说明文字',
+    '8. 原表一个格子里有几门课，就拆成几行',
+    '9. 周次照原样保留：3-4周,6-15周 不要自己合并成 3-15周',
+    '10. 最后请直接给我一个能下载的 .xlsx 或 .csv 文件；给不了文件，就给逗号分隔的表格文本',
+    '',
+    '不要解释，只要表格。'
+  ].join('\n');
+}
 /* 导不进去时，让用户把这段话连同课表发给 AI */
 function aiPrompt(){
   if(isEN()){
@@ -7003,7 +7084,10 @@ function aiPrompt(){
       '5. teacher — leave empty if none; keep the empty column between the bars',
       '6. skip cells marked 无课 (no class)',
       '7. if one class meets twice a week, output two lines',
-      '8. output only these lines: no header, no explanation, no code block',
+      '8. if one cell holds several classes, output one line each; no merged cells, no index column',
+      '9. if the source is an image or PDF, read it cell by cell — do not skip the faint ones',
+      '10. keep week ranges as written: 3-4周,6-15周 stays 3-4周,6-15周, do not merge into 3-15周',
+      '11. output only these lines: no header, no explanation, no code block',
       '',
       'Example:',
       '高等数学|周一|第1-2节|5-17周|11J2102|韩雪',
@@ -7024,8 +7108,11 @@ function aiPrompt(){
     '4. 地点写楼名加房间号，如 11J2102；没有就留空',
     '5. 教师没有就留空，空的那一列也要保留竖线',
     '6. 标着「无课」的格子跳过，不要输出',
-    '7. 同一门课一周上几次就输出几行',
-    '8. 只输出这些行：不要表头，不要解释，不要代码块',
+    '7. 同一门课一周上几次就输出几行（比如周一和周三都上，就写两行）',
+    '8. 一格里有几门课就写几行；不要合并单元格，不要加序号列',
+    '9. 如果原表是图片或 PDF，请按行列一格格读出来，别漏掉不显眼的格子',
+    '10. 周次写法照原样保留，比如 3-4周,6-15周 就写成 3-4周,6-15周，不要自己合并成 3-15周',
+    '11. 只输出这些行：不要表头，不要解释，不要代码块',
     '',
     '例子：',
     '高等数学|周一|第1-2节|5-17周|11J2102|韩雪',
@@ -7098,11 +7185,16 @@ function parseGridSchedule(rows,sheetName){
       }
       var cellCopy={};
       for(var c6 in content) if(content[c6]) cellCopy[c6]=content[c6];
-      blocks.push({row:r+1,lbl:lbl,jt:jcFrom(lbl),tm:tmFrom(lbl),cells:cellCopy});
+      blocks.push({row:r+1,lbl:lbl,lbls:lbls.slice(),jt:jcFrom(lbl),tm:tmFrom(lbl),cells:cellCopy});
     }
 
     blocks.forEach(function(bk){
       var cells=bk.cells, jt=bk.jt, k;
+      if(!jt){
+        /* 「上午」「1-2」是两列拼起来的，整串认不出就逐列试 */
+        var lb=bk.lbls||[];
+        for(var li=0;li<lb.length;li++){ var jy=jcFrom(lb[li]); if(jy){ jt=jy; break; } }
+      }
       if(!jt){
         for(k in cells){ var jx=jcFrom(cells[k]); if(jx&&/节/.test(cells[k])){ jt=jx; break; } }
       }
@@ -7181,7 +7273,7 @@ function parseGridSchedule(rows,sheetName){
   for(var pn in perSeen){ if(typeof perSeen[pn]==='object') periods.push(perSeen[pn]); }
   periods.sort(function(a,b){ return a.n-b.n; });
 
-  return {list:list,errs:errs,grid:true,periods:periods,termStart:termStart};
+  return {list:list,errs:errs,grid:true,periods:periods,termStart:termStart,src:sheetName||''};
 }
 function sheetToRows(sh){
   var rows=XLSX.utils.sheet_to_json(sh,{header:1,blankrows:false,raw:false});
@@ -7199,10 +7291,42 @@ function parseAnySheet(rows,name){
 }
 /* ---------- 课表导入 / 作息设置 ---------- */
 function weekdayOf(str){
-  var m=String(str||'').match(/^(星期|周|礼拜)([一二三四五六日天])$/);
-  if(!m) return -1;
-  var c=m[2], map={'一':0,'二':1,'三':2,'四':3,'五':4,'六':5,'日':6,'天':6};
-  return map[c]!=null?map[c]:-1;
+  var t=String(str||'').trim();
+  var m=t.match(/^(星期|周|礼拜)\s*([一二三四五六日天])$/);
+  if(m){
+    var map={'一':0,'二':1,'三':2,'四':3,'五':4,'六':5,'日':6,'天':6};
+    return map[m[2]]!=null?map[m[2]]:-1;
+  }
+  /* AI 有时按英文输出，一并认了 */
+  var en=t.toLowerCase().replace(/\.$/,'');
+  var em={mon:0,monday:0,tue:1,tues:1,tuesday:1,wed:2,weds:2,wednesday:2,
+          thu:3,thur:3,thurs:3,thursday:3,fri:4,friday:4,sat:5,saturday:5,sun:6,sunday:6};
+  if(em[en]!=null) return em[en];
+  return -1;
+}
+/* 表头驱动：只要前几行里有「课程/星期/节次/周次/地点/教师」这类列名，
+   就按列名定位，不再靠猜列的位置。
+   这样 AI 把表转成什么样（加了序号列、列序变了、tab 还是竖线分隔）都能读对。 */
+function parseHeaderTable(lines){
+  for(var i=0;i<Math.min(lines.length,10);i++){
+    var raw=String(lines[i]||'');
+    if(!raw.trim()) continue;
+    var sep=/	/.test(raw)?/\t+/:/\s*[|｜]\s*/;
+    var cs=raw.split(sep).map(function(x){ return String(x||'').trim(); });
+    if(cs.length<4) continue;
+    var idx={name:-1,wd:-1,jt:-1,wk:-1,place:-1,teacher:-1}, hit=0, j;
+    for(j=0;j<cs.length;j++){
+      var c=cs[j].replace(/[\s*＊]/g,'');
+      if(idx.name<0   && /^(课程名称|课程名|科目名称|课程|科目|名称|课名)$/.test(c)) { idx.name=j; hit++; continue; }
+      if(idx.wd<0     && /^(星期|周几|上课星期|星期几|day|weekday)$/i.test(c))    { idx.wd=j; hit++; continue; }
+      if(idx.jt<0     && /^(节次|节|上课节次|时段|节数|period)$/i.test(c))          { idx.jt=j; hit++; continue; }
+      if(idx.wk<0     && /^(周次|上课周次|教学周|周数|weeks?)$/i.test(c))            { idx.wk=j; hit++; continue; }
+      if(idx.place<0  && /^(地点|教室|场地|上课地点|上课教室|room|location)$/i.test(c)){ idx.place=j; continue; }
+      if(idx.teacher<0&& /^(教师|老师|任课教师|授课教师|teacher)$/i.test(c))         { idx.teacher=j; continue; }
+    }
+    if(hit>=3) return {row:i, idx:idx, sep:sep};
+  }
+  return null;
 }
 function parseCourseText(txt){
   var lines=String(txt||'').split(/\r?\n/), out=[], errs=[];
@@ -7213,6 +7337,31 @@ function parseCourseText(txt){
     if(nwd>=3){
       return {list:[], errs:[isEN()?'This looks like a grid timetable (periods × weekdays). Use the "Class detail" sheet instead — one row per class with weekday, period and weeks columns.':'这看起来是「周课表」（行列是节次×星期的那种）。请换另一张表：Excel 里叫「上课明细」，每行是一门课，有「星期」「节次」「周次」三列，复制它再粘贴。'], grid:true};
     }
+  }
+  /* 先看是不是「有表头的明细表」——这种直接按列名读，成功率最高 */
+  var HT=parseHeaderTable(lines);
+  if(HT){
+    for(var hi=HT.row+1; hi<lines.length; hi++){
+      var hraw=String(lines[hi]||'').replace(/\u00a0/g,' ').trim();
+      if(!hraw) continue;
+      if(/^(以下|上面|说明|注意|注[：:]|共\s*\d|整理后)/.test(hraw)) continue;
+      var hc=hraw.split(HT.sep).map(function(x){ return String(x||'').trim(); });
+      var hname=HT.idx.name>=0 ? (hc[HT.idx.name]||'') : '';
+      var hwd   = HT.idx.wd>=0   ? weekdayOf(hc[HT.idx.wd]||'') : -1;
+      var hjt   = HT.idx.jt>=0   ? jcFrom(hc[HT.idx.jt]||'') : null;
+      var hwk   = HT.idx.wk>=0   ? wkAny(hc[HT.idx.wk]||'') : null;
+      if(!hname || hwd<0 || !hjt || !hwk){
+        if(hname || hwd>=0 || hjt){ errs.push((isEN()?'Line '+(hi+1)+': incomplete → ':'第 '+(hi+1)+' 行：信息不全 → ')+hraw.slice(0,26)); }
+        continue;
+      }
+      var hco={name:cleanName(hname), place:(HT.idx.place>=0?(hc[HT.idx.place]||''):''),
+               teacher:(HT.idx.teacher>=0?(hc[HT.idx.teacher]||''):''),
+               j1:hjt[0], j2:hjt[1], weeks:hwk, wd:hwd};
+      hco=finishCell(hco);
+      if(hco) out.push(hco);
+    }
+    if(out.length) return {list:out, errs:errs};
+    out=[]; errs=[];   /* 表头模式没读出东西，退回原来的宽松解析 */
   }
   lines.forEach(function(raw,idx){
     var ln=raw.replace(/\u00a0/g,' ').trim();
@@ -7486,20 +7635,45 @@ function openCourseImport(){
   var sh=openSheet(
     '<div class="sh-h"><button class="tb" id="ciClose">'+UIx('close')+'</button><div class="t">'+UIx('rowImport')+'</div><span class="tb r"></span></div>'+
     '<div class="sh-b">'+
-      '<div class="card" style="padding:14px">'+
-        '<div style="font-size:13.5px;font-weight:600;margin-bottom:8px">'+UIx('ciTitle')+'</div>'+
-        '<div class="hint" style="padding:0;line-height:1.75">'+UIx('ciHint')+'</div>'+
-        '<button class="subtle" id="ciPick" style="margin-top:14px;color:var(--accent);font-weight:600;font-size:14px">'+UIx('ciPick')+'</button>'+
+      '<div class="citab">'+
+        '<button class="on" data-t="file">'+(isEN()?'File':'选文件')+'</button>'+
+        '<button data-t="paste">'+(isEN()?'Paste':'粘贴')+'</button>'+
+        '<button data-t="ai">'+(isEN()?'Use AI':'让 AI 转')+'</button>'+
+      '</div>'+
+      '<div id="ciP-file">'+
+        '<div class="hint" style="padding:0;line-height:1.75">'+(isEN()
+          ?'Pick the timetable exported from your school system (.xlsx / .xls / .csv). If you only have a PDF or a screenshot, switch to the Use AI tab.'
+          :'选教务系统导出的课表文件（.xlsx / .xls / .csv）。如果手上只有 PDF 或截图，切到「让 AI 转」。')+'</div>'+
+        '<button class="cipick" id="ciPick">'+UIx('ciPick')+'</button>'+
         '<div class="hint" id="ciFileN" style="padding:0;margin-top:8px"></div>'+
+      '</div>'+
+      '<div id="ciP-paste" hidden>'+
+        '<div class="hint" style="padding:0;line-height:1.75">'+(isEN()
+          ?'Copy the table from Excel or a web page and paste it here, one class per line (name / weekday / period / weeks / room / teacher). Headers are fine.'
+          :'从 Excel 或教务系统网页里把整张表复制下来粘在这里，一行一门课（课程 / 星期 / 节次 / 周次 / 地点 / 老师）。带表头也能认。')+'</div>'+
+        '<textarea class="f-note" id="ciText" style="min-height:130px;margin-top:8px;font-family:ui-monospace,monospace;font-size:12px" placeholder="课程名称&#9;星期&#9;节次&#9;周次&#9;地点&#9;教师&#10;高等数学A(上)&#9;星期一&#9;3-4&#9;3-4,6-15&#9;东10A-104&#9;甘小霞"></textarea>'+
+        '<button class="subtle" id="ciParse" style="margin-top:8px;color:var(--accent);font-weight:600">'+(isEN()?'Parse & preview':'解析并预览')+'</button>'+
+      '</div>'+
+      '<div id="ciP-ai" hidden>'+
+        '<div class="hint" style="padding:0;line-height:1.75">'+(isEN()
+          ?'Timetable is a screenshot, a PDF, or a page you cannot export? Let an AI turn it into a table first.'
+          :'课表只有截图、PDF，或者教务系统的网页导不出来？让 AI 帮你转成表格，两种情况都给了现成的话。')+'</div>'+
+        '<button class="subtle" id="ciAiExcel" style="margin-top:12px;color:var(--accent);font-weight:600;font-size:13.5px">'+
+          (isEN()?'① Copy the turn-into-Excel prompt':'① 复制「转成 Excel」提示词')+'</button>'+
+        '<div class="hint" style="padding:0;margin-top:4px;font-size:11.5px">'+(isEN()
+          ?'Send it with the screenshot; the AI gives you a clean .xlsx/.csv, then come back to the File tab.'
+          :'发给 AI 时把课表截图一起发，它会给你一个规整的 .xlsx/.csv，拿到文件回到「选文件」那页导入。')+'</div>'+
+        '<button class="subtle" id="ciAiCopy" style="margin-top:14px;color:var(--accent);font-weight:600;font-size:13.5px">'+
+          (isEN()?'② Copy the tidy-into-text prompt':'② 复制「整理成文本」提示词')+'</button>'+
+        '<div class="hint" style="padding:0;margin-top:4px;font-size:11.5px">'+(isEN()
+          ?'No file needed: the AI answers one class per line, paste it below.'
+          :'不想折腾文件就走这条：AI 直接回一行一门课的文本，粘到下面就能导。')+'</div>'+
+        '<div class="hint" style="padding:0;margin-top:14px;font-weight:600;color:var(--text-2)">'+UIx('ciAiPaste')+'</div>'+
+        '<textarea class="f-note" id="ciAiText" style="min-height:118px;margin-top:6px;font-family:ui-monospace,monospace;font-size:12px" placeholder="'+UIx('ciAiPh')+'"></textarea>'+
+        '<button class="subtle" id="ciAiParse" style="margin-top:8px;color:var(--accent);font-weight:600;font-size:13.5px">'+(isEN()?'Parse & preview':'解析并预览')+'</button>'+
       '</div>'+
       '<input type="file" id="ciFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" style="display:none">'+
       '<div id="ciPrev"></div>'+
-      '<button class="subtle" id="ciManual" style="margin-top:14px">'+UIx('ciManual')+'</button>'+
-      '<div id="ciManualBox" hidden>'+
-        '<textarea class="f-note" id="ciText" style="min-height:130px;margin-top:8px;font-family:ui-monospace,monospace;font-size:12px" placeholder="高等数学A(上)	星期一	3-4节	3-4周,6-15周	东10A-104	甘小霞"></textarea>'+
-        '<button class="subtle" id="ciParse" style="margin-top:8px">'+(isEN()?'Parse & preview':'解析并预览')+'</button>'+
-        '<div class="hint" style="padding:0;margin-top:6px">'+(isEN()?'Copy from the "Class detail" sheet in Excel: one row per class, with name / weekday / period / weeks / room / teacher.':'从 Excel 的「上课明细」那张表复制：每行一门课，含 课程名称 / 星期 / 节次 / 周次 / 地点 / 老师。')+'</div>'+
-      '</div>'+
     '</div>');
   $('#ciClose',sh).addEventListener('click',closeSheet);
 
@@ -7507,7 +7681,7 @@ function openCourseImport(){
     __courseParsed=r;
     var h='';
     if(r.list.length){
-      h+='<div class="hint" style="margin-top:14px">'+UIx('recognized',{n:'<b>'+r.list.length+'</b>'})+(r.grid?UIx('ciGridTag'):'')+'</div>';
+      h+='<div class="hint" style="margin-top:14px">'+UIx('recognized',{n:'<b>'+r.list.length+'</b>'})+(r.grid?UIx('ciGridTag'):'')+(r.src?(' · '+esc(r.src)):'')+'</div>';
       h+='<div class="card" style="margin-top:6px;max-height:250px;overflow:auto">';
       h+=r.list.map(function(c){
         return '<div class="row" style="align-items:flex-start;padding:8px 14px"><div style="flex:1;min-width:0">'+
@@ -7520,18 +7694,14 @@ function openCourseImport(){
     }
     if(r.errs.length){
       h+='<div class="warn" style="margin-top:10px">'+r.errs.slice(0,6).map(esc).join('<br>')+(r.errs.length>6?'<br>'+(isEN()?('…and '+(r.errs.length-6)+' more'):('…还有 '+(r.errs.length-6)+' 条')):'')+'</div>';
-    }
-    if(!r.list.length&&!r.errs.length) h+='<div class="hint" style="margin-top:12px">'+(isEN()?'No classes found — check that this file really is a timetable.':'没读到课程，确认一下这个文件是不是课表。')+'</div>';
-    if(!r.list.length||r.errs.length>=Math.max(3,r.list.length)){
-      h+='<div class="card" style="margin-top:12px;padding:14px">'+
-        '<div style="font-size:13.5px;font-weight:600">'+UIx(r.list.length?'ciAiT2':'ciAiT')+'</div>'+
-        '<div class="hint" style="padding:0;margin-top:6px;line-height:1.75">'+UIx('ciAiD')+'</div>'+
-        '<button class="subtle" id="ciAiCopy" style="margin-top:12px;color:var(--accent);font-weight:600;font-size:13.5px">'+UIx('ciAiCopy')+'</button>'+
-        '<div class="hint" style="padding:0;margin-top:16px;font-weight:600;color:var(--text-2)">'+UIx('ciAiPaste')+'</div>'+
-        '<textarea class="f-note" id="ciAiText" style="min-height:118px;margin-top:6px;font-family:ui-monospace,monospace;font-size:12px" placeholder="'+UIx('ciAiPh')+'"></textarea>'+
-        '<button class="subtle" id="ciAiParse" style="margin-top:8px;color:var(--accent);font-weight:600;font-size:13.5px">'+(isEN()?'Parse & preview':'解析并预览')+'</button>'+
+      /* 这些行多半是实践课/军训/实习：表里只写了「1-16周」和老师，没有星期和节次，
+         本来就没法排进时间轴，跳过是对的。不写清楚的话，用户会以为漏课了。 */
+      h+='<div class="hint" style="padding:0;margin-top:6px;line-height:1.7">'+
+        T('上面这些行一般是实践课、军训或实习，表里只写了周次和老师，没有星期几和节次，排不进时间轴，跳过是对的。真要记的话，在日程里手动加一条待办就行。',
+          'Those lines are usually practice / military training / internship — the sheet gives only weeks and teacher, no weekday or period, so they cannot sit on the timeline. Add a to-do manually if you need to.')+
         '</div>';
     }
+    if(!r.list.length&&!r.errs.length) h+='<div class="hint" style="margin-top:12px">'+(isEN()?'No classes found — check that this file really is a timetable.':'没读到课程，确认一下这个文件是不是课表。')+'</div>';
     if(r.list.length){
       var pDiff=(r.periods&&r.periods.length)&&JSON.stringify(r.periods)!==JSON.stringify(S.settings.periods||[]);
       if(pDiff){
@@ -7558,17 +7728,7 @@ function openCourseImport(){
       h+='<label class="hint" style="display:block;margin-top:8px;padding:0"><input type="checkbox" id="ciClrTask" style="vertical-align:-2px"> '+(isEN()?'Also remove the to-dos that duplicate these classes':'同时删掉和这些课重名的待办')+'</label>';
     }
     $('#ciPrev',sh).innerHTML=h;
-    var aic=$('#ciAiCopy',sh);
-    if(aic) aic.addEventListener('click',function(){
-      copyText(aiPrompt(),UIx('ciAiDone'),isEN()?'Copy failed':'复制失败');
-    });
-    var aip=$('#ciAiParse',sh);
-    if(aip) aip.addEventListener('click',function(){
-      var v=($('#ciAiText',sh)&&$('#ciAiText',sh).value)||'';
-      if(!v.trim()){ toast(isEN()?'Paste something first':'先把 AI 给你的内容粘进来'); return; }
-      var rows=v.split(/\r?\n/).map(function(l){ return l.split(/\t|\s*\|\s*/); });
-      renderPreview(parseAnySheet(rows,'pasted'));
-    });
+    $('#ciPrev',sh).scrollIntoView({block:'nearest',behavior:'smooth'});
     var go=$('#ciGo',sh);
     if(go) go.addEventListener('click',function(){
       var rep2=$('#ciRep',sh)&&$('#ciRep',sh).checked;
@@ -7642,8 +7802,29 @@ function openCourseImport(){
     rd.onerror=function(){ $('#ciPrev',sh).innerHTML='<div class="warn">'+(isEN()?'Could not read the file':'文件读取出错')+'</div>'; };
     rd.readAsArrayBuffer(f);
   });
-  $('#ciManual',sh).addEventListener('click',function(){
-    var b=$('#ciManualBox',sh); b.hidden=!b.hidden;
+  /* 三个入口的分段切换 */
+  (function(){
+    var tabs=sh.querySelectorAll('.citab button');
+    for(var i=0;i<tabs.length;i++){
+      tabs[i].addEventListener('click',function(){
+        var t=this.getAttribute('data-t');
+        for(var k=0;k<tabs.length;k++) tabs[k].classList.toggle('on', tabs[k]===this);
+        ['file','paste','ai'].forEach(function(key){
+          var p=$('#ciP-'+key,sh); if(p) p.hidden=(key!==t);
+        });
+      });
+    }
+  })();
+  $('#ciAiExcel',sh).addEventListener('click',function(){
+    copyText(aiPromptExcel(),UIx('ciAiDone'),isEN()?'Copy failed':'复制失败');
+  });
+  $('#ciAiCopy',sh).addEventListener('click',function(){
+    copyText(aiPrompt(),UIx('ciAiDone'),isEN()?'Copy failed':'复制失败');
+  });
+  $('#ciAiParse',sh).addEventListener('click',function(){
+    var v=($('#ciAiText',sh)&&$('#ciAiText',sh).value)||'';
+    if(!v.trim()){ toast(isEN()?'Paste something first':'先把 AI 给你的内容粘进来'); return; }
+    renderPreview(parseAnySheet(v.split(/\r?\n/).map(function(l){ return l.split(/\t|\s*\|\s*/); }),'pasted'));
   });
   $('#ciParse',sh).addEventListener('click',function(){
     var pv=$('#ciText',sh).value||'';
@@ -9610,9 +9791,14 @@ setInterval(function(){
 function refreshNowLine(){
   var el=document.getElementById('nowline');
   if(!el) return;
-  if(S.date!==todayISO()||S.view!=='day'||S.settings.mode!=='scale'){ el.remove(); return; }
+  /* 以前这里在不满足条件时直接 el.remove()，把红线的 DOM 删掉了。
+     切到别的模块再切回来时页面不会重绘，红线就再也回不来——
+     表现得就是「红线时有时无，切几下模块才出现」。
+     现在只隐藏，不删。 */
+  if(S.date!==todayISO()||S.view!=='day'||S.settings.mode!=='scale') return;
   var m=nowMin();
-  if(m<dayMin()||m>dayMax()){ el.remove(); return; }
+  if(m<dayMin()||m>dayMax()){ el.style.display='none'; return; }
+  el.style.display='';
   el.style.top=((m-dayMin())*pxMin())+'px';
 }
 var __focusDay=null, __focusAt=0;
@@ -9635,6 +9821,7 @@ function onAppFocus(){
   if(sync.code) scheduleSync();
   updAuto();
   pushWidget();
+  refreshGreet();
   var a=purgeArchive(), b=ensureOccurrences(), d=todayISO();
   if(a||b||__focusDay!==d){ __focusDay=d; render(); }
   else refreshNowLine();          // 平时只挪一下“现在”那条线，不重绘整页
@@ -9731,6 +9918,7 @@ $('#lTitle').addEventListener('click',openTaskFilter);
 $('#tdDate').addEventListener('click',function(){ openCalendar(); });
 var __dayMark=todayISO();
 setInterval(function(){
+  refreshGreet();
   if(todayISO()!==__dayMark){ __dayMark=todayISO(); resetDailyDone(); resetPeriodDone(); save(); render(); toast(T('新的一天 · 精力回到 100','New day · energy back to 100')); }
 },60000);
 $('#ddlBar').addEventListener('click',function(){ setView('list'); });

@@ -1,10 +1,10 @@
 {
-  "version": "2.0.52",
-  "code": 166,
+  "version": "2.0.53",
+  "code": 167,
   "url": "https://gh-proxy.com/https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk",
   "mirrors": [
     "https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk",
     "https://ghproxy.net/https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk"
   ],
-  "notes": "· 修：日程页的「现在」红线切模块回来后消失，要刷新几次才出现\n· 修：今天页问候语停在「夜深了」，早上打开也不变\n· 导入预览显示读的是哪张表，跳过的行会说明原因"
+  "notes": "· 修：按返回键 / 侧滑返回不再直接退出 App，改成先退一层（关弹窗、回上一个页面），退无可退时提示「再按一次退出」\n· 新：导出到系统日历，把日程导进手机日历，由系统准时提醒\n· 新：iPhone 可以用网页版了（添加到主屏幕，免安装）\n· 修：网页版断网打不开的问题"
 }

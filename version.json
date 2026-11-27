@@ -1,10 +1,10 @@
 {
-  "version": "2.0.53",
-  "code": 167,
+  "version": "2.0.55",
+  "code": 170,
   "url": "https://gh-proxy.com/https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk",
   "mirrors": [
     "https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk",
     "https://ghproxy.net/https://github.com/Streamfish-lab/daycat/releases/latest/download/Schedule.apk"
   ],
-  "notes": "· 修：按返回键 / 侧滑返回不再直接退出 App，改成先退一层（关弹窗、回上一个页面），退无可退时提示「再按一次退出」\n· 新：导出到系统日历，把日程导进手机日历，由系统准时提醒\n· 新：iPhone 可以用网页版了（添加到主屏幕，免安装）\n· 修：网页版断网打不开的问题"
+  "notes": "· 修：同一条提醒偶尔会弹两条通知。原因是每条提醒在系统里登记了两个备份闹钟，第二个被系统延迟时躲过了去重，现在改成按「提醒 + 计划时刻」去重，延迟多久都只响一次\n· 修：删掉任务后，备份闹钟现在也会一起取消，不会再多响一声\n· 网页版版本号同步"
 }
